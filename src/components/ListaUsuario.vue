@@ -219,7 +219,7 @@ export default {
         this.dialogDelete= true
       },
       confirmDelete(){
-        const path = `http://localhost:8000/backtablas/usuarios/${this.itemId}/`
+        const path = `${this.$hostname}/backtablas/usuarios/${this.itemId}/`
         axios.delete(path).then((response) => {
           console.log("ok",response.data)
           this.$emit("actualizarTabla",0)
@@ -240,10 +240,10 @@ export default {
       actualizar(){
         this.datosUsuario.usuario_correo = this.editedItem.correo
         this.datosUsuario.usuario_contrasena = this.editedItem.contrasena
-        const path = `http://localhost:8000/backtablas/usuarios/${this.editedItem.id}/`
-        const pathAd = `http://localhost:8000/backtablas/administradores/${this.editedItem.idtipo}/`
-        const pathPr = `http://localhost:8000/backtablas/profesores/${this.editedItem.idtipo}/`
-        const pathAl = `http://localhost:8000/backtablas/alumnos/${this.editedItem.idtipo}/`
+        const path = `${this.$hostname}/backtablas/usuarios/${this.editedItem.id}/`
+        const pathAd = `${this.$hostname}/backtablas/administradores/${this.editedItem.idtipo}/`
+        const pathPr = `${this.$hostname}/backtablas/profesores/${this.editedItem.idtipo}/`
+        const pathAl = `${this.$hostname}/backtablas/alumnos/${this.editedItem.idtipo}/`
         axios.put(path,this.datosUsuario).then((response) =>{
           console.log(response.data)
           if(this.editedItem.tipo=='Administrador'){
@@ -290,7 +290,7 @@ export default {
 
     },
     mounted () {
-     const path = `http://localhost:8000/backtablas/listado`
+     const path = `${this.$hostname}/backtablas/listado`
      axios.get(path).then((response) => {
        this.datosResponse = response.data
        for (let i = 0; i < this.datosResponse.length; i++) {

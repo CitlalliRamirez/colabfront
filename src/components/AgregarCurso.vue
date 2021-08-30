@@ -119,7 +119,7 @@ export default {
           curso.append("idprofesor",this.datosForm.profesor)
           var crftoken = Cookies.get('csrftoken')
           console.log(crftoken)
-          const path = `http://localhost:8000/backtablas/guarda`
+          const path = `${this.$hostname}/backtablas/guarda`
           axios.post(path,curso).then((response) => {
             console.log(response.data)
             this.$emit("agregarTabla",1)
@@ -131,7 +131,7 @@ export default {
       }
     },
     mounted(){
-        const path = `http://localhost:8000/backtablas/profesores/`
+        const path = `${this.$hostname}/backtablas/profesores/`
         axios.get(path).then((response) => {
             this.datosResponse = response.data
             console.log(this.datosResponse)

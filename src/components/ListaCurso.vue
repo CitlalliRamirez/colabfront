@@ -199,7 +199,7 @@ export default {
         this.dialogDelete= true
       },
       confirmDelete(){ //eliminar de cursos
-        const path = `http://localhost:8000/backtablas/cursos/${this.itemId}/`
+        const path = `${this.$hostname}/backtablas/cursos/${this.itemId}/`
         axios.delete(path).then((response) => {
           console.log("ok",response.data)
           this.$emit("actualizarTabla",0)
@@ -220,7 +220,7 @@ export default {
       actualizar(){
           this.datosCurso.curso_nombre = this.editedItem.nombre
           this.datosCurso.profesor = this.editedItem.profesor
-          const path = `http://localhost:8000/backtablas/cursos/${this.editedItem.id}/`
+          const path = `${this.$hostname}/backtablas/cursos/${this.editedItem.id}/`
           
           axios.put(path,this.datosCurso).then((response) =>{
             console.log(response.data)
@@ -235,7 +235,7 @@ export default {
 
     },
     mounted () {
-     const path = `http://localhost:8000/backtablas/listadocurso`
+     const path = `${this.$hostname}/backtablas/listadocurso`
      axios.get(path).then((response) => {
        this.datosResponse = response.data
        for (let i = 0; i < this.datosResponse.length; i++) {
@@ -251,7 +251,7 @@ export default {
      .catch((error) => {
        console.log(error)
      })
-     const pathP = `http://localhost:8000/backtablas/profesores/`
+     const pathP = `${this.$hostname}/backtablas/profesores/`
         axios.get(pathP).then((response) => {
             this.datosResponse = response.data
             console.log(this.datosResponse)

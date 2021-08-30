@@ -90,7 +90,7 @@ export default {
         }
       },
       buscarCmps(){
-          const path=`http://localhost:8000/backtablas/usuarios/${this.login}/`
+          const path=`${this.$hostname}/backtablas/usuarios/${this.login}/`
           axios.get(path).then((response) => {
               this.formulario.contrasena = response.data.usuario_contrasena
               console.log(this.formulario.contrasena,this.password)

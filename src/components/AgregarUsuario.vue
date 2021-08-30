@@ -149,10 +149,10 @@ export default {
         }
       },
     guardarUsuario (){
-        const pathU = `http://localhost:8000/backtablas/usuarios/`
-        const pathAd = `http://localhost:8000/backtablas/administradores/`
-        const pathPr = `http://localhost:8000/backtablas/profesores/`
-        const pathAl = `http://localhost:8000/backtablas/alumnos/`
+        const pathU = `${this.$hostname}/backtablas/usuarios/`
+        const pathAd = `${this.$hostname}/backtablas/administradores/`
+        const pathPr = `${this.$hostname}/backtablas/profesores/`
+        const pathAl = `${this.$hostname}/backtablas/alumnos/`
 
         this.datosUsuario.usuario_correo = this.datosForm.correo
         this.datosUsuario.usuario_contrasena = this.datosForm.contrasena
