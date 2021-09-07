@@ -32,19 +32,48 @@
       :footer-props="{'items-per-page-text':'Datos por página','page-text':'{0}-{1} de {2}'}"  
     >
     <template v-slot:item.actions="{ item }">
+      <v-btn
+        v-if="ocultarEd"
+        depressed
+        small
+        @click="editItem(item)"
+      >
+      Editar
       <v-icon
         small
         class="mr-2"
-        @click="editItem(item)"
       >
         mdi-pencil
       </v-icon>
-      <v-icon
+      </v-btn>
+
+      <v-btn
+        v-if="ocultarEl"
+        depressed
         small
         @click="deleteItem(item)"
       >
+      Eliminar
+      <v-icon
+        small 
+      >
         mdi-delete
       </v-icon>
+      </v-btn>
+
+      <v-btn
+      v-if="ocultarEn"
+      depressed
+      small
+      @click="ocultarListaC(item.id)"
+      >
+      Entrar
+      <v-icon
+        small 
+      >
+        mdi-arrow-up-bold-box-outline
+      </v-icon>
+      </v-btn>
     </template>
     </v-data-table>
     <v-dialog
@@ -62,12 +91,21 @@
               <br/>
               <v-form
               ref="form">
-                    <v-text-field
+                    <v-tooltip right
+                    color="red">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-text-field 
+                      v-bind="attrs"
+                      v-on="on"
                       v-model="editedItem.nombre"
                       :rules="nameRules"
                       label="Nombre"
                       required
                     ></v-text-field>
+                    </template>
+                    <span>Campo obligatorio</span>
+                    </v-tooltip>
+                    
                     <v-text-field
                       v-model="editedItem.semestre"
                       label="Semestre"
@@ -144,10 +182,14 @@
 
 <script>
 import axios from 'axios'
+import jwt_decode from 'jwt-decode'
 export default {
    name: 'ListaCurso',
    data: () => ({
         dialog: false,
+        ocultarEd: false,
+        ocultarEl:false,
+        ocultarEn:false,
         editedIndex: -1,
         items3:[],
         datosCurso: {curso_nombre:'',profesor:0},
@@ -233,6 +275,12 @@ export default {
         this.dialog = false
       },
 
+      ocultarListaC(item){
+        this.$emit("ocultarListaC")
+        this.$root.$emit("ocultarselect")
+        this.$session.set("idcurso",item)
+      }
+
     },
     mounted () {
      const path = `${this.$hostname}/backtablas/listadocurso`
@@ -254,7 +302,6 @@ export default {
      const pathP = `${this.$hostname}/backtablas/profesores/`
         axios.get(pathP).then((response) => {
             this.datosResponse = response.data
-            console.log(this.datosResponse)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items3.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].profesor_nombre})
@@ -264,7 +311,19 @@ export default {
         .catch((error) => {
             console.log(error)
         })  
-      
+      let token = this.$session.get('jwt')
+      let datosUsuario = jwt_decode(token)
+      let tipo =datosUsuario.Tipo 
+      if(tipo=="Administrador"){
+        this.ocultarEd = true
+        this.ocultarEl = true
+        this.ocultarEn = false
+
+      }else{
+        this.ocultarEd = false
+        this.ocultarEl = false
+        this.ocultarEn = true
+      }
     },
 }
 </script>

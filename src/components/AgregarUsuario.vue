@@ -16,26 +16,50 @@
     ref="form"
     lazy-validation
   >
-    <v-text-field
+    <v-tooltip right
+    color="red">
+    <template v-slot:activator="{ on, attrs }">
+    <v-text-field 
+      v-bind="attrs"
+      v-on="on"
       v-model="datosForm.nombre"
       :rules="nameRules"
       label="Nombre"
       required
     ></v-text-field>
+    </template>
+    <span>Campo obligatorio</span>
+    </v-tooltip>
 
-    <v-text-field
+    <v-tooltip right
+    color="red">
+    <template v-slot:activator="{ on, attrs }">
+    <v-text-field 
+      v-bind="attrs"
+      v-on="on"
       v-model="datosForm.correo"
       :rules="emailRules"
       label="Correo"
       required
     ></v-text-field>
-    
-    <v-text-field
+    </template>
+    <span>Debe tener el formato ejem@ejem.com</span>
+    </v-tooltip>
+
+    <v-tooltip right
+    color="red">
+    <template v-slot:activator="{ on, attrs }">
+    <v-text-field 
+      v-bind="attrs"
+      v-on="on"
       v-model="datosForm.contrasena"
       :rules="passRules"
       label="Contraseña"
       required
     ></v-text-field>
+    </template>
+    <span>La contraseña es obligatoria y debe tener al menos 8 caracteres</span>
+    </v-tooltip>
 
     <v-select
       @change="ocultarSelect()"
@@ -55,6 +79,7 @@
       required
     ></v-select>
 
+    
     <v-select
       v-model="datosForm.carrera"
       :items="items3"
@@ -63,6 +88,8 @@
       v-if = "ocultar"
       required
     ></v-select>
+
+
     <v-btn
       color="blue"
       class="mr-4"

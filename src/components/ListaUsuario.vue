@@ -29,22 +29,35 @@
       :search="search"
       no-data-text="No se encontraron resultados"
       no-results-text="No se encontraron resultados"
-      :footer-props="{'items-per-page-text':'Datos por página','page-text':'{0}-{1} de {2}'}"  
+      :footer-props="{'items-per-page-text':'Datos por página','page-text':'{0}-{1} de {2}','items-per-page-all-text':'Todo'}"  
     >
     <template v-slot:item.actions="{ item }">
+      <v-btn
+      depressed
+      small
+      @click="editItem(item)"
+      >
+        Editar
       <v-icon
         small
-        class="mr-2"
-        @click="editItem(item)"
+        class="mr-2" 
       >
         mdi-pencil
       </v-icon>
+      </v-btn>
+
+      <v-btn
+      depressed
+      small
+      @click="deleteItem(item)"
+      >
+      Eliminar
       <v-icon
-        small
-        @click="deleteItem(item)"
+        small 
       >
         mdi-delete
       </v-icon>
+      </v-btn>
     </template>
     </v-data-table>
     <v-dialog
@@ -67,24 +80,54 @@
                       label="ID"
                       disabled
                     ></v-text-field>
-                    <v-text-field
+
+
+                    <v-tooltip right
+                    color="red">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-text-field 
+                      v-bind="attrs"
+                      v-on="on"
                       v-model="editedItem.nombre"
                       :rules="nameRules"
                       label="Nombre"
                       required
                     ></v-text-field>
-                    <v-text-field
+                    </template>
+                    <span>Campo obligatorio</span>
+                    </v-tooltip>
+
+
+                    <v-tooltip right
+                    color="red">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-text-field 
+                      v-bind="attrs"
+                      v-on="on"
                       v-model="editedItem.correo"
                       :rules="emailRules"
                       label="Correo"
                       required
                     ></v-text-field>
-                    <v-text-field
+                    </template>
+                    <span>Debe tener el formato ejem@ejem.com</span>
+                    </v-tooltip>
+
+                    <v-tooltip right
+                    color="red">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-text-field 
+                      v-bind="attrs"
+                      v-on="on"
                       v-model="editedItem.contrasena"
                       :rules="passRules"
                       label="Contraseña"
                       required
                     ></v-text-field>
+                    </template>
+                    <span>La contraseña es obligatoria y debe tener al menos 8 caracteres</span>
+                    </v-tooltip>
+
                    <v-text-field
                       v-model="editedItem.tipo"
                       label="Tipo de usuario"
@@ -147,6 +190,7 @@
 
 <script>
 import axios from 'axios'
+
 export default {
    name: 'ListaUsuario',
    data: () => ({
@@ -306,8 +350,9 @@ export default {
      })
      .catch((error) => {
        console.log(error)
-     })  
+     }) 
     },
+    
 }
 </script>
 

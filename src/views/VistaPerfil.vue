@@ -1,11 +1,13 @@
 <template>
   <div>
     <barra />
-    <perfil :userInfo="userInfo" v-on:mostrarForm="vistaForm"/>
+    <perfil :userInfo="userInfo" v-on:mostrarForm="vistaForm" v-on:inicio="inicio"/>
     <lista-usuario v-if="cardLista" v-on:actualizarTabla="actTabla" :key="tablak"/>
     <agregar-usuario v-if="cardAgregar" v-on:agregarTabla="agrTabla"/>
     <agregar-curso v-if="cardAgregarC" v-on:agregarTabla="agrTabla"/>
-    <lista-curso v-if="cardListaC" v-on:actualizarTabla="actTabla" :key="tablac"/>
+    <lista-curso v-if="cardListaC" v-on:actualizarTabla="actTabla" v-on:ocultarListaC="ocultarLista" :key="tablac"/>
+    <lista-chat v-if="cardListaCh" v-on:actualizarTabla="actTabla" v-on:ocultarListaCh="ocultarListach" :key="tablal"/>
+    <agregar-chat v-if="cardAgregarCh" v-on:ocultaAgr="ocultaAgr"/>
     <div>
         <template>
           <div class="text-center">
@@ -33,6 +35,9 @@
   import AgregarUsuario from '@/components/AgregarUsuario.vue'
   import AgregarCurso from '@/components/AgregarCurso.vue'
   import ListaCurso from '@/components/ListaCurso.vue'
+  import ListaChat from '@/components/ListaChat.vue'
+  import AgregarChat from '@/components/AgregarChat.vue'
+  import jwt_decode from 'jwt-decode'
   export default {
     name: 'VistaPerfil',
     data: () => ({
@@ -42,11 +47,14 @@
         color:"green",
         tablak: 1,
         tablac:1,
+        tablal:1,
         userInfo: '',
         cardLista: false,
         cardAgregar: false,
         cardAgregarC: false,
         cardListaC:false,
+        cardListaCh:false,
+        cardAgregarCh:false,
     }),
     components: {
         Perfil,
@@ -55,31 +63,45 @@
         AgregarUsuario,
         AgregarCurso,
         ListaCurso,
+        ListaChat,
+        AgregarChat,
     },
     methods:{
         vistaForm(evt){
-          console.log("evt ",evt)
           if(evt==1){
             this.cardLista=true
             this.cardAgregar=false
             this.cardAgregarC=false
             this.cardListaC=false
+            this.cardListaCh=false
           }else if(evt==2){
             this.cardLista=false
             this.cardAgregar=true
             this.cardAgregarC=false
             this.cardListaC=false
+            this.cardListaCh=false
           }else if(evt==3){
             this.cardLista=false
             this.cardAgregar=false
             this.cardAgregarC=false
             this.cardListaC=true
+            this.cardAgregarCh=false
+            this.cardListaCh=false
           }else{
             this.cardLista=false
             this.cardAgregar=false
             this.cardAgregarC=true
             this.cardListaC=false
+            this.cardListaCh=false
           }
+        },
+        inicio(){
+            this.cardLista=false
+            this.cardAgregar=false
+            this.cardAgregarC=false
+            this.cardListaC=false
+            this.cardListaCh=false
+            this.cardAgregarCh=false
         },
         actTabla(v){
           if(v==-1){
@@ -88,6 +110,7 @@
           }else{
             this.tablak++
             this.tablac++
+            this.tablal++
             if(v==0){
               this.text = 'El registro ha sido eliminado exitosamente'
             }else{
@@ -108,10 +131,29 @@
             this.color = "red"
           }
           
+        },
+        ocultarLista(){
+          this.cardListaC=false
+          this.cardListaCh=true
+        },
+        ocultarListach(){
+          this.cardListaCh=false
+          this.cardAgregarCh=true
+        },
+        ocultaAgr(){
+          this.cardAgregarCh=false
+          this.cardListaCh=true
         }
     },
+    beforeCreate: function () {
+      if (!this.$session.exists()) {
+        this.$router.push('/')
+      }
+    },
     mounted () {
-     this.userInfo = this.$route.params.userInfo
-  }
+        let token = this.$session.get('jwt')
+        let datosUsuario = jwt_decode(token)
+        this.userInfo = datosUsuario.Tipo+': '+datosUsuario.Nombre
+    }
   }
 </script>

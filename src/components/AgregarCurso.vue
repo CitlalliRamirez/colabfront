@@ -16,12 +16,21 @@
     ref="form"
     lazy-validation
   >
-    <v-text-field
+    <v-tooltip right
+    color="red">
+    <template v-slot:activator="{ on, attrs }">
+    <v-text-field 
+      v-bind="attrs"
+      v-on="on"
       v-model="datosForm.nombre"
       :rules="nameRules"
       label="Nombre"
       required
     ></v-text-field>
+    </template>
+    <span>Campo obligatorio</span>
+    </v-tooltip>
+
     <v-select
       v-model="datosForm.semestre"
       :items="items"
@@ -54,16 +63,33 @@
     >
       Guardar
     </v-btn>
-        <v-btn
-      color="blue"
-      class="mr-4"
-      @click="guardarCurso"
-    >
-      Probar
-    </v-btn>
   </v-form>
   </v-card-text>
   </v-card>
+
+  <v-dialog
+      v-model="dialogDelete"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          Nota curso
+        </v-card-title>
+        <v-card-text>El curso no se registrará, porque no hay alumnos suficientes en el semestre y carrera seleccionada, registrar más usuarios o seleccione otra carrera y/o semestre</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="gray"
+            text
+            @click="close"
+          >
+            Aceptar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!----->
   </v-container>
 </template>
 
@@ -75,6 +101,7 @@ import Cookies from 'js-cookie'
 export default {
    name: 'AgregarCurso',
    data: () => ({
+     dialogDelete: false,
       datosForm: {nombre:'',semestre:'',carrera:'',profesor:''},
       datosCurso: {curso_nombre:'',profesor:0},
       datosAC:{curso:0,alumno:0},
@@ -104,6 +131,9 @@ export default {
     }),
 
     methods: {
+        close () {
+          this.dialogDelete = false
+        },
         validate (evt) {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
@@ -122,7 +152,11 @@ export default {
           const path = `${this.$hostname}/backtablas/guarda`
           axios.post(path,curso).then((response) => {
             console.log(response.data)
-            this.$emit("agregarTabla",1)
+            this.dialogDelete = true
+            if(response.data=='ok'){
+                this.$refs.form.reset()
+                this.$emit("agregarTabla",1)
+            }
           })
           .catch((error)=>{
             console.log(error)

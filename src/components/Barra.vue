@@ -6,7 +6,7 @@
       <v-img
         alt="logo"
         src="@/assets/chat.png"
-        width="50"
+        width="60"
         class="shrink mr-2"
         contain
       ></v-img>

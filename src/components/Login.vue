@@ -28,7 +28,12 @@
                         <v-form
                           ref="form"
                         >
+                           <v-tooltip right
+                           color="red">
+                           <template v-slot:activator="{ on, attrs }">
                            <v-text-field
+                              v-bind="attrs"
+                              v-on="on"
                               v-model="login"
                               prepend-icon="mdi-account"
                               name="login"
@@ -37,7 +42,15 @@
                               :rules="ruleLogin"
                               required
                            ></v-text-field>
+                           </template>
+                           <span>Campo obligatorio</span>
+                           </v-tooltip>
+                           <v-tooltip right
+                           color="red">
+                           <template v-slot:activator="{ on, attrs }">
                            <v-text-field
+                              v-bind="attrs"
+                              v-on="on"
                               v-model="password"
                               id="password"
                               prepend-icon="mdi-lock"
@@ -47,6 +60,9 @@
                               :rules="rulePass"
                               required
                            ></v-text-field>
+                           </template>
+                           <span>La contraseña es obligatoria y debe tener al menos 8 caracteres</span>
+                           </v-tooltip>
                         </v-form>
                      </v-card-text>
                      <v-card-actions>
@@ -61,6 +77,7 @@
 
 <script>
 import axios from 'axios'
+//import jwt_decode from 'jwt-decode'
 export default {
    name: 'Login',
    props: {
@@ -90,7 +107,32 @@ export default {
         }
       },
       buscarCmps(){
-          const path=`${this.$hostname}/backtablas/usuarios/${this.login}/`
+          const path=`${this.$hostname}/backtablas/autentificar`
+          let datosLogin =new FormData()
+          datosLogin.append("id",this.login)
+          datosLogin.append("contrasena",this.password)
+          axios.post(path,datosLogin).then((response)=> {
+             if(response.data==0){
+                console.log("incorrecto")
+                this.snackbar = true
+             }else if(response.data==-1){
+                this.text="El usuario no existe"
+                console.log("no existe")
+                this.snackbar = true
+             }else{
+                let token = response.data
+                this.$session.start()
+                this.$session.set('jwt',token)
+                //Vue.http.headers.common['Authorization'] = 'Bearer ' + token          
+                this.$router.push({name:'VistaPerfil'})
+             }
+             
+          })
+          .catch((error)=>{
+             this.snackbar = true
+             console.log(error)
+          })
+          /**const path=`${this.$hostname}/backtablas/usuarios/${this.login}/`
           axios.get(path).then((response) => {
               this.formulario.contrasena = response.data.usuario_contrasena
               console.log(this.formulario.contrasena,this.password)
@@ -105,7 +147,7 @@ export default {
           .catch((error) => {
               this.snackbar = true
               console.log(error.response)
-          })
+          })**/
       },
     }
 };

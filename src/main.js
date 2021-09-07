@@ -5,7 +5,7 @@ import vuetify from './plugins/vuetify'
 import VueSession from 'vue-session'
 
 Vue.config.productionTip = false
-Vue.prototype.$deploy = true
+Vue.prototype.$deploy = false
 Vue.prototype.$hostname = (Vue.prototype.$deploy)?'https://colabback.herokuapp.com':'http://localhost:8000'
 
 Vue.use(VueSession)

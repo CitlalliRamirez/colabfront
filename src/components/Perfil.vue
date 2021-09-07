@@ -1,13 +1,21 @@
 <template>
   <v-container>
     <div class="alto"></div>
-    <v-row >
+    <v-card
+      class="mx-auto"
+      flat
+      color="grey lighten-4"
+    >
+    <v-row>
      <v-col
         cols="12"
         sm="2"
       >
-        <div class="text-center">
-          <v-btn text>
+        <div class="text-right">
+          <v-btn 
+          text
+          @click="inicio"
+          color="grey darken-1">
             Inicio
           </v-btn>
         </div>
@@ -23,6 +31,7 @@
           :key="key1"
           :items="items"
           label="Usuarios"
+          :disabled="muestra"
           dense
         ></v-select>
       </v-col>
@@ -43,25 +52,29 @@
       <v-col
         class="d-flex"
         cols="12"
-        sm="6"
+        sm="5"
       >
         <v-select
           :items="items3"
           :label="userInfo"
+          @change="logout"
           dense
         ></v-select>
       </v-col>
     </v-row>
+    </v-card>
   </v-container>
 </template>
 
 <script>
 //import axios from 'axios'
+import jwt_decode from 'jwt-decode'
 export default {
    name: 'Perfil',
    data: () => ({
       key1:1,
       key2:1,
+      muestra:null,
       items: ['Ver usuarios', 'Agregar usuarios'],
       items2: ['Ver cursos', 'Agregar cursos'],
       items3: ['Cerrar sesión'],
@@ -72,6 +85,11 @@ export default {
         userInfo: String
     },
     methods: {
+      inicio(){
+        this.selectC=null
+        this.selectU=null
+        this.$emit("inicio")
+      },
       ocultarSelect (){ 
         let idSelect
         this.key2++
@@ -96,6 +114,25 @@ export default {
         }
         this.$emit("mostrarForm",idSelect)
       },
+      logout: function () {
+        this.$session.destroy()
+        this.$router.push('/')
+      }
+    },
+    mounted(){
+      let token = this.$session.get('jwt')
+      let datosUsuario = jwt_decode(token)
+      let tipo =datosUsuario.Tipo
+      if(tipo=="Administrador"){
+        this.muestra=false
+      }else{
+        this.muestra=true
+        this.items2.splice(1,1)
+      }
+
+      this.$root.$on("ocultarselect",()=>{
+        this.selectC=null
+      })
     }
 };
 </script>
