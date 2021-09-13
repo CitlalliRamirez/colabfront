@@ -7,7 +7,7 @@
     <agregar-curso v-if="cardAgregarC" v-on:agregarTabla="agrTabla"/>
     <lista-curso v-if="cardListaC" v-on:actualizarTabla="actTabla" v-on:ocultarListaC="ocultarLista" :key="tablac"/>
     <lista-chat v-if="cardListaCh" v-on:actualizarTabla="actTabla" v-on:ocultarListaCh="ocultarListach" :key="tablal"/>
-    <agregar-chat v-if="cardAgregarCh" v-on:ocultaAgr="ocultaAgr"/>
+    <agregar-chat v-if="cardAgregarCh" v-on:agregarTabla="agrTabla" v-on:ocultaAgr="ocultaAgr"/>
     <div>
         <template>
           <div class="text-center">
@@ -125,6 +125,20 @@
             this.text = 'El registro ha sido agregado exitosamente'
             this.snackbarA = true
             this.color = "green"
+            this.cardAgregar=false //modal de usuario
+            this.cardLista =true //lista de usuarios
+          }else if(v==2){
+            this.text = 'El registro ha sido agregado exitosamente'
+            this.snackbarA = true
+            this.color = "green"
+            this.cardAgregarC = false //modal de curso
+            this.cardListaC =true //lista de cursos
+          }else if(v==3){
+            this.text = 'El registro ha sido agregado exitosamente'
+            this.snackbarA = true
+            this.color = "green"
+            this.cardAgregarCh=false //modal de chat
+            this.cardListaCh = true // lista de chats
           }else{
             this.text = 'Ha ocurrido un error, intente de nuevo'
             this.snackbarA = true

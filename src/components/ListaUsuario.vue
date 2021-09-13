@@ -360,4 +360,12 @@ export default {
 .encab{
     border: 1px solid gray;
 }
+.my-data-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.my-data-table .v-datatable.v-table {
+  order: -1;
+}
 </style>

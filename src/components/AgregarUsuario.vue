@@ -89,14 +89,23 @@
       required
     ></v-select>
 
-
-    <v-btn
-      color="blue"
-      class="mr-4"
-      @click="validate"
-    >
-      Guardar
-    </v-btn>
+    <v-card-actions>
+    <v-spacer></v-spacer>
+      <v-btn
+        color="blue"
+        class="mr-4"
+        @click="validate"
+      >
+        Guardar
+      </v-btn>
+      <v-btn
+        color="grey"
+        class="mr-4"
+        @click="cancelar"
+      >
+        Cancelar
+      </v-btn>
+    </v-card-actions>
   </v-form>
   </v-card-text>
   </v-card>
@@ -175,11 +184,16 @@ export default {
             this.guardarUsuario()
         }
       },
+      cancelar(){
+        this.$refs.form.reset()
+        this.$root.$emit("inicio") //devuelva a la pagina de inicio
+      },
     guardarUsuario (){
         const pathU = `${this.$hostname}/backtablas/usuarios/`
         const pathAd = `${this.$hostname}/backtablas/administradores/`
         const pathPr = `${this.$hostname}/backtablas/profesores/`
         const pathAl = `${this.$hostname}/backtablas/alumnos/`
+        const pathEnvia = `${this.$hostname}/backtablas/envia`
 
         this.datosUsuario.usuario_correo = this.datosForm.correo
         this.datosUsuario.usuario_contrasena = this.datosForm.contrasena
@@ -191,7 +205,14 @@ export default {
             axios.post(pathAd,this.datosAdmin).then((response) => {
                 console.log("Administrador Registrado",response.data.id)
                 this.$refs.form.reset()
-                this.$emit("agregarTabla",1)
+                axios.get(pathEnvia).then((response) => {
+                  console.log(response.data)
+                  this.$emit("agregarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("agregarTabla",-1)
+                })
             })
                 .catch((error) => {
                 console.log(error)
@@ -203,7 +224,14 @@ export default {
             axios.post(pathPr,this.datosProf).then((response) => {
                 console.log("Profesor Registrado",response.data.id)
                 this.$refs.form.reset()
-                this.$emit("agregarTabla",1)
+                axios.get(pathEnvia).then((response) => {
+                  console.log(response.data)
+                  this.$emit("agregarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("agregarTabla",-1)
+                })
             })
                 .catch((error) => {
                 console.log(error)
@@ -217,7 +245,14 @@ export default {
             axios.post(pathAl,this.datosAlum).then((response) => {
                 console.log("Alumno Registrado",response.data.id)
                 this.$refs.form.reset()
-                this.$emit("agregarTabla",1)
+                axios.get(pathEnvia).then((response) => {
+                  console.log(response.data)
+                  this.$emit("agregarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("agregarTabla",-1)
+                })
             })
                 .catch((error) => {
                 console.log(error)

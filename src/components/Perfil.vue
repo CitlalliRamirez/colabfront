@@ -9,7 +9,7 @@
     <v-row>
      <v-col
         cols="12"
-        sm="2"
+        :sm="sm"
       >
         <div class="text-right">
           <v-btn 
@@ -24,6 +24,7 @@
         class="d-flex"
         cols="12"
         sm="2"
+        v-if="v2"
       >
         <v-select
           @change="ocultarSelect()"
@@ -31,14 +32,14 @@
           :key="key1"
           :items="items"
           label="Usuarios"
-          :disabled="muestra"
+          v-if ="muestra"
           dense
         ></v-select>
       </v-col>
       <v-col
         class="d-flex"
         cols="12"
-        sm="2"
+        :sm="sm"
       >
         <v-select
           @change="ocultarSelect2()"
@@ -74,7 +75,9 @@ export default {
    data: () => ({
       key1:1,
       key2:1,
-      muestra:null,
+      v2: true,
+      sm:2,
+      muestra:true,
       items: ['Ver usuarios', 'Agregar usuarios'],
       items2: ['Ver cursos', 'Agregar cursos'],
       items3: ['Cerrar sesión'],
@@ -124,12 +127,19 @@ export default {
       let datosUsuario = jwt_decode(token)
       let tipo =datosUsuario.Tipo
       if(tipo=="Administrador"){
-        this.muestra=false
-      }else{
         this.muestra=true
+        this.v2=true
+      }else{
+        this.muestra=false
+        this.v2=false
+        this.sm=3
         this.items2.splice(1,1)
       }
-
+      this.$root.$on("inicio",()=>{
+        this.selectU=null
+        this.selectC=null
+        this.$emit("inicio")
+      })
       this.$root.$on("ocultarselect",()=>{
         this.selectC=null
       })

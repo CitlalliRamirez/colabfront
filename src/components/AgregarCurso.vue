@@ -56,6 +56,8 @@
       label="Profesor"
       required
     ></v-select>
+    <v-card-actions>
+    <v-spacer></v-spacer>
     <v-btn
       color="blue"
       class="mr-4"
@@ -63,6 +65,14 @@
     >
       Guardar
     </v-btn>
+    <v-btn
+        color="grey"
+        class="mr-4"
+        @click="cancelar"
+      >
+        Cancelar
+      </v-btn>
+    </v-card-actions>
   </v-form>
   </v-card-text>
   </v-card>
@@ -74,9 +84,9 @@
     >
       <v-card>
         <v-card-title class="text-h5">
-          Nota curso
+          Precaución: Minímo 4 alumnos.
         </v-card-title>
-        <v-card-text>El curso no se registrará, porque no hay alumnos suficientes en el semestre y carrera seleccionada, registrar más usuarios o seleccione otra carrera y/o semestre</v-card-text>
+        <v-card-text>El curso no se registrará, porque no hay alumnos suficientes que coincidan con el semestre y carrera seleccionada, registrar más usuarios o seleccione otra carrera y/o semestre</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
@@ -96,8 +106,6 @@
 <script>
 import axios from 'axios'
 import Cookies from 'js-cookie'
-//axios.defaults.xsrfHeaderName = "X-CSRFToken"
-//axios.defaults.xsrfCookieName = "csrftoken"
 export default {
    name: 'AgregarCurso',
    data: () => ({
@@ -141,6 +149,10 @@ export default {
             this.guardarCurso()
         }
       },
+      cancelar(){
+        this.$refs.form.reset()
+        this.$root.$emit("inicio") //devuelva a la pagina de inicio
+      },
       guardarCurso(){
           let curso = new FormData()
           curso.append("nombre",this.datosForm.nombre)
@@ -151,11 +163,12 @@ export default {
           console.log(crftoken)
           const path = `${this.$hostname}/backtablas/guarda`
           axios.post(path,curso).then((response) => {
-            console.log(response.data)
-            this.dialogDelete = true
+            console.log(response.data) 
             if(response.data=='ok'){
                 this.$refs.form.reset()
-                this.$emit("agregarTabla",1)
+                this.$emit("agregarTabla",2)
+            }else{
+                this.dialogDelete = true
             }
           })
           .catch((error)=>{

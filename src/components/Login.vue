@@ -9,7 +9,7 @@
                             v-model="snackbar"
                             :timeout="timeout"
                             :value="true"
-                            color="green"
+                            color="red"
                             absolute
                             right
                             rounded="pill"
@@ -122,8 +122,7 @@ export default {
              }else{
                 let token = response.data
                 this.$session.start()
-                this.$session.set('jwt',token)
-                //Vue.http.headers.common['Authorization'] = 'Bearer ' + token          
+                this.$session.set('jwt',token)        
                 this.$router.push({name:'VistaPerfil'})
              }
              
@@ -132,22 +131,6 @@ export default {
              this.snackbar = true
              console.log(error)
           })
-          /**const path=`${this.$hostname}/backtablas/usuarios/${this.login}/`
-          axios.get(path).then((response) => {
-              this.formulario.contrasena = response.data.usuario_contrasena
-              console.log(this.formulario.contrasena,this.password)
-              console.log(response.status)
-              if(this.formulario.contrasena==this.password){
-                  let userInfo = response.data.usuario_correo
-                  this.$router.push({name:'VistaPerfil', params:{userInfo}})
-              }else{
-                  this.snackbar = true
-              }
-          })
-          .catch((error) => {
-              this.snackbar = true
-              console.log(error.response)
-          })**/
       },
     }
 };

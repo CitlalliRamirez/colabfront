@@ -72,6 +72,8 @@
       multiple
       required
     ></v-select>
+    <v-card-actions>
+    <v-spacer></v-spacer>
     <v-btn
       color="blue"
       class="mr-4"
@@ -79,6 +81,14 @@
     >
       Guardar
     </v-btn>
+    <v-btn
+        color="grey"
+        class="mr-4"
+        @click="cancelar"
+      >
+        Cancelar
+      </v-btn>
+    </v-card-actions>
   </v-form>
   </v-card-text>
   </v-card>
@@ -213,6 +223,10 @@ export default {
             this.guardarChat()
         }
       },
+      cancelar(){
+        this.$refs.form.reset()
+        this.$root.$emit("inicio") //devuelva a la pagina de inicio
+      },
       guardarChat(){//chat
          const path = `${this.$hostname}/backtablas/guardac`
           let chat = new FormData()
@@ -224,7 +238,7 @@ export default {
           axios.post(path,chat).then((response) => {
                 console.log("ok",response.data)
                 this.$refs.form.reset()
-                this.$emit("agregarTabla",1)
+                this.$emit("agregarTabla",3)
           })
           .catch((error)=>{
             console.log(error)
