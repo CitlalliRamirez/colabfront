@@ -167,6 +167,7 @@ export default {
             if(response.data=='ok'){
                 this.$refs.form.reset()
                 this.$emit("agregarTabla",2)
+                this.$root.$emit("actualizaSelect")
             }else{
                 this.dialogDelete = true
             }

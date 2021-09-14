@@ -239,6 +239,7 @@ export default {
                 console.log("ok",response.data)
                 this.$refs.form.reset()
                 this.$emit("agregarTabla",3)
+                this.$root.$emit("actualizaSelect")
           })
           .catch((error)=>{
             console.log(error)

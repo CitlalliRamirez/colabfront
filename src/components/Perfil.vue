@@ -135,6 +135,10 @@ export default {
         this.sm=3
         this.items2.splice(1,1)
       }
+      this.$root.$on("actualizaSelect",()=>{
+        this.selectU=null
+        this.selectC=null
+      })
       this.$root.$on("inicio",()=>{
         this.selectU=null
         this.selectC=null

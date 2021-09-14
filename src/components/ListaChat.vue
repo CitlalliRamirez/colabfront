@@ -153,6 +153,13 @@
               <v-btn
                 color="blue"
                 text
+                @click="limpiar"
+              >
+                Limpiar roles
+              </v-btn>
+              <v-btn
+                color="blue"
+                text
                 @click="validate"
               >
                 Guardar
@@ -241,6 +248,13 @@ export default {
           moderador: 0,
           observador:0,
         },
+        editedItemResp: {
+          id:0,
+          nombre: '',
+          editor: 0,
+          moderador: 0,
+          observador:0,
+        },
     }),
     computed: {
       formTitle () {
@@ -322,8 +336,10 @@ export default {
         },
         //////editar
       editItem (item) {
+        console.log("item",item)
         this.editedIndex = this.datosTabla.indexOf(item)
         this.editedItem = Object.assign({}, item)
+        this.editedItemResp = Object.assign({}, item)
         let datitos = []
         datitos.push(this.editedItem.editor)
         datitos.push(this.editedItem.moderador)
@@ -358,6 +374,8 @@ export default {
       },
       cancel () {
         this.dialog = false
+        this.editedItem=Object.assign({}, this.editedItemResp)
+
       },
       deleteItem (item){
         this.itemId = item.id
@@ -381,6 +399,16 @@ export default {
         if(vari==true){
             this.actualizar()
         }
+      },
+      limpiar(){
+        for(let i=0;i<this.items.length;i++){
+                this.items[i].disabled=false
+                this.items2[i].disabled=false
+        }
+        this.editedItem.moderador=0
+        this.editedItem.editor=0
+        this.editedItem.observador=0
+        console.log("ed",this.editedItem)
       },
       actualizar(){//actualizar chat
           const path = `${this.$hostname}/backtablas/actualizarc`

@@ -194,20 +194,25 @@ export default {
         const pathPr = `${this.$hostname}/backtablas/profesores/`
         const pathAl = `${this.$hostname}/backtablas/alumnos/`
         const pathEnvia = `${this.$hostname}/backtablas/envia`
-
+        let datoscorreo = new FormData()
         this.datosUsuario.usuario_correo = this.datosForm.correo
         this.datosUsuario.usuario_contrasena = this.datosForm.contrasena
+        datoscorreo.append("correo",this.datosForm.correo)
+        datoscorreo.append("contrasena",this.datosForm.contrasena)
+        datoscorreo.append("mensaje","registrados")
         axios.post(pathU,this.datosUsuario).then((response) => {
             this.idU = response.data.id
+            datoscorreo.append("idU",this.idU)
             if(this.select=='Administrador'){
             this.datosAdmin.administrador_nombre = this.datosForm.nombre
             this.datosAdmin.usuario = this.idU
             axios.post(pathAd,this.datosAdmin).then((response) => {
                 console.log("Administrador Registrado",response.data.id)
                 this.$refs.form.reset()
-                axios.get(pathEnvia).then((response) => {
+                axios.post(pathEnvia,datoscorreo).then((response) => {
                   console.log(response.data)
                   this.$emit("agregarTabla",1)
+                  this.$root.$emit("actualizaSelect")
                 })
                 .catch((error) => {
                   console.log(error)
@@ -224,9 +229,10 @@ export default {
             axios.post(pathPr,this.datosProf).then((response) => {
                 console.log("Profesor Registrado",response.data.id)
                 this.$refs.form.reset()
-                axios.get(pathEnvia).then((response) => {
+                axios.post(pathEnvia,datoscorreo).then((response) => {
                   console.log(response.data)
                   this.$emit("agregarTabla",1)
+                  this.$root.$emit("actualizaSelect")
                 })
                 .catch((error) => {
                   console.log(error)
@@ -245,9 +251,10 @@ export default {
             axios.post(pathAl,this.datosAlum).then((response) => {
                 console.log("Alumno Registrado",response.data.id)
                 this.$refs.form.reset()
-                axios.get(pathEnvia).then((response) => {
+                axios.post(pathEnvia,datoscorreo).then((response) => {
                   console.log(response.data)
                   this.$emit("agregarTabla",1)
+                  this.$root.$emit("actualizaSelect")
                 })
                 .catch((error) => {
                   console.log(error)

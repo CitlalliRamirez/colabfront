@@ -284,6 +284,12 @@ export default {
       actualizar(){
         this.datosUsuario.usuario_correo = this.editedItem.correo
         this.datosUsuario.usuario_contrasena = this.editedItem.contrasena
+        const pathEnvia = `${this.$hostname}/backtablas/envia`
+        let datoscorreo = new FormData()
+        datoscorreo.append("correo",this.editedItem.correo)
+        datoscorreo.append("contrasena",this.editedItem.contrasena)
+        datoscorreo.append("mensaje","actualizados")
+        datoscorreo.append("idU",this.editedItem.id)
         const path = `${this.$hostname}/backtablas/usuarios/${this.editedItem.id}/`
         const pathAd = `${this.$hostname}/backtablas/administradores/${this.editedItem.idtipo}/`
         const pathPr = `${this.$hostname}/backtablas/profesores/${this.editedItem.idtipo}/`
@@ -294,7 +300,14 @@ export default {
             this.datosAdmin.administrador_nombre = this.editedItem.nombre
             axios.patch(pathAd,this.datosAdmin).then((response) => {
                 console.log("Administrador Actualizado",response.data)
-                this.$emit("actualizarTabla",1)               
+                axios.post(pathEnvia,datoscorreo).then((response) => {
+                  console.log(response.data)
+                  this.$emit("actualizarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("actualizarTabla",-1)
+                })
             })
             .catch((error) => {
                 console.log(error)
@@ -304,7 +317,14 @@ export default {
             this.datosProf.profesor_nombre = this.editedItem.nombre
             axios.patch(pathPr,this.datosProf).then((response) => {
                 console.log("Profesor Actualizado",response.data)
-                this.$emit("actualizarTabla",1)
+                axios.post(pathEnvia,datoscorreo).then((response) => {
+                  console.log(response.data)
+                  this.$emit("actualizarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("actualizarTabla",-1)
+                })
             })
             .catch((error) => {
                 console.log(error)
@@ -315,7 +335,14 @@ export default {
             this.datosAlum.alumno_nombre = this.editedItem.nombre
             axios.patch(pathAl,this.datosAlum).then((response) => {
                 console.log("Alumno Actualizado",response.data)
-                this.$emit("actualizarTabla",1)               
+                axios.post(pathEnvia,datoscorreo).then((response) => {
+                  console.log(response.data)
+                  this.$emit("actualizarTabla",1)
+                })
+                .catch((error) => {
+                  console.log(error)
+                this.$emit("actualizarTabla",-1)
+                })               
             })
             .catch((error) => {
                 console.log(error)

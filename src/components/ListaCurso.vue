@@ -283,9 +283,17 @@ export default {
 
     },
     mounted () {
+     let token = this.$session.get('jwt')
+     let datosUsuario = jwt_decode(token)
+     let tipo =datosUsuario.Tipo  
+     let idU = datosUsuario.Id
      const path = `${this.$hostname}/backtablas/listadocurso`
-     axios.get(path).then((response) => {
+     let datos = new FormData()
+     datos.append("tipo",tipo)
+     datos.append("idU",idU)
+     axios.post(path,datos).then((response) => {
        this.datosResponse = response.data
+       console.log(this.datosResponse)
        for (let i = 0; i < this.datosResponse.length; i++) {
          this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
@@ -311,9 +319,7 @@ export default {
         .catch((error) => {
             console.log(error)
         })  
-      let token = this.$session.get('jwt')
-      let datosUsuario = jwt_decode(token)
-      let tipo =datosUsuario.Tipo 
+      
       if(tipo=="Administrador"){
         this.ocultarEd = true
         this.ocultarEl = true
