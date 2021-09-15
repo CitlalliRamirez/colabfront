@@ -441,6 +441,8 @@ export default {
         }
         let curso = new FormData()
         curso.append("id",this.$session.get("idcurso"))
+        curso.append("tipo",datosUsuario.Tipo)
+        curso.append("idU",datosUsuario.Id)
         const path = `${this.$hostname}/backtablas/listadocurso/listadochat`
         axios.post(path,curso).then((response) => {
        this.datosResponse = response.data
