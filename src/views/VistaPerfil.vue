@@ -6,8 +6,9 @@
     <agregar-usuario v-if="cardAgregar" v-on:agregarTabla="agrTabla"/>
     <agregar-curso v-if="cardAgregarC" v-on:agregarTabla="agrTabla"/>
     <lista-curso v-if="cardListaC" v-on:actualizarTabla="actTabla" v-on:ocultarListaC="ocultarLista" :key="tablac"/>
-    <lista-chat v-if="cardListaCh" v-on:actualizarTabla="actTabla" v-on:ocultarListaCh="ocultarListach" :key="tablal"/>
+    <lista-chat v-if="cardListaCh" v-on:ventanachat="ventanachat" v-on:actualizarTabla="actTabla" v-on:ocultarListaCh="ocultarListach" :key="tablal"/>
     <agregar-chat v-if="cardAgregarCh" v-on:agregarTabla="agrTabla" v-on:ocultaAgr="ocultaAgr"/>
+    <ver-chat :userInfo="rol"  v-if="cardChat"  />
     <div>
         <template>
           <div class="text-center">
@@ -37,6 +38,7 @@
   import ListaCurso from '@/components/ListaCurso.vue'
   import ListaChat from '@/components/ListaChat.vue'
   import AgregarChat from '@/components/AgregarChat.vue'
+  import VerChat from '@/components/VerChat.vue'
   import jwt_decode from 'jwt-decode'
   export default {
     name: 'VistaPerfil',
@@ -49,12 +51,14 @@
         tablac:1,
         tablal:1,
         userInfo: '',
+        rol:'',
         cardLista: false,
         cardAgregar: false,
         cardAgregarC: false,
         cardListaC:false,
         cardListaCh:false,
         cardAgregarCh:false,
+        cardChat:false
     }),
     components: {
         Perfil,
@@ -65,8 +69,15 @@
         ListaCurso,
         ListaChat,
         AgregarChat,
+        VerChat,
     },
     methods:{
+        ventanachat(dato){
+          console.log(dato)
+          this.rol = "Esta ventana es del: "+dato
+          this.cardChat=true
+          this.cardListaCh=false
+        },
         vistaForm(evt){
           if(evt==1){
             this.cardLista=true
@@ -74,12 +85,14 @@
             this.cardAgregarC=false
             this.cardListaC=false
             this.cardListaCh=false
+            this.cardChat= false
           }else if(evt==2){
             this.cardLista=false
             this.cardAgregar=true
             this.cardAgregarC=false
             this.cardListaC=false
             this.cardListaCh=false
+            this.cardChat= false
           }else if(evt==3){
             this.cardLista=false
             this.cardAgregar=false
@@ -87,12 +100,14 @@
             this.cardListaC=true
             this.cardAgregarCh=false
             this.cardListaCh=false
+            this.cardChat= false
           }else{
             this.cardLista=false
             this.cardAgregar=false
             this.cardAgregarC=true
             this.cardListaC=false
             this.cardListaCh=false
+            this.cardChat= false
           }
         },
         inicio(){
@@ -102,6 +117,7 @@
             this.cardListaC=false
             this.cardListaCh=false
             this.cardAgregarCh=false
+            this.cardChat= false
         },
         actTabla(v){
           if(v==-1){

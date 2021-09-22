@@ -73,6 +73,7 @@
       <v-btn
       depressed
       small
+      @click="ventanaChat"
       >
       Entrar
       <v-icon
@@ -262,6 +263,28 @@ export default {
       },
     },
     methods:{
+      ventanaChat(){
+        let token = this.$session.get('jwt')
+        let datosUsuario = jwt_decode(token)
+        let tipo =datosUsuario.Tipo 
+        const path = `${this.$hostname}/backtablas/rol`
+        if(tipo=="Profesor"){
+          //mostrar y decir que es profesor
+          this.$emit("ventanachat","Profesor")
+        }else{
+          //mostrar y decir que rol (editor,mod,observador)
+          let id = new FormData()
+          id.append("id",datosUsuario.Id)
+          axios.post(path,id).then((response)=>{
+            let rol = response.data
+            this.$emit("ventanachat",rol)
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+          
+        }
+      },
       ocultarListaCh(){
           this.$emit("ocultarListaCh")
       },

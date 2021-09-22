@@ -194,6 +194,8 @@ export default {
         const pathPr = `${this.$hostname}/backtablas/profesores/`
         const pathAl = `${this.$hostname}/backtablas/alumnos/`
         const pathEnvia = `${this.$hostname}/backtablas/envia`
+        const existeCurso = `${this.$hostname}/backtablas/existecurso`
+        const insertaCurso = `${this.$hostname}/backtablas/insertacurso`
         let datoscorreo = new FormData()
         this.datosUsuario.usuario_correo = this.datosForm.correo
         this.datosUsuario.usuario_contrasena = this.datosForm.contrasena
@@ -248,23 +250,44 @@ export default {
             this.datosAlum.alumno_semestre = this.datosForm.semestre
             this.datosAlum.alumno_carrera = this.datosForm.carrera
             this.datosAlum.usuario = this.idU
-            axios.post(pathAl,this.datosAlum).then((response) => {
-                console.log("Alumno Registrado",response.data.id)
-                this.$refs.form.reset()
-                axios.post(pathEnvia,datoscorreo).then((response) => {
-                  console.log(response.data)
+            const datosAlumnos = new FormData()
+            datosAlumnos.append("semestre",this.datosAlum.alumno_semestre)
+            datosAlumnos.append("carrera",this.datosAlum.alumno_carrera)
+            axios.post(existeCurso,datosAlumnos).then((response)=>{//existecurso?
+              console.log("existe?",response.data)
+              datosAlumnos.append("idcurso",response.data)
+              axios.post(pathAl,this.datosAlum).then((response) => { //registra alumno
+                  console.log("Alumno Registrado",response.data.id)
+                  this.$refs.form.reset()
                   this.$emit("agregarTabla",1)
                   this.$root.$emit("actualizaSelect")
-                })
-                .catch((error) => {
+                  ////insertar a curso
+                  datosAlumnos.append("id",response.data.id)
+                  axios.post(insertaCurso,datosAlumnos).then((response) => {
+                    console.log("se inserta a curso",response.data)
+                  })
+                  .catch((error) => {
+                    console.log(error)
+                  })
+                  ////insertar a curso               
+                  ////envia
+                  axios.post(pathEnvia,datoscorreo).then((response) => {
+                    console.log(response.data)
+                  })
+                  .catch((error) => {
+                    console.log(error)
+                  })////envia
+                
+              })
+              .catch((error) => {
                   console.log(error)
-                this.$emit("agregarTabla",-1)
-                })
+                  this.$emit("agregarTabla",-1)
+              })//registra alumno
             })
-                .catch((error) => {
-                console.log(error)
-                this.$emit("agregarTabla",-1)
-            })
+            .catch((error) => {
+                  console.log(error)
+            })//existecurso?
+
         }
 
         })
