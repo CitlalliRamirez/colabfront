@@ -170,7 +170,7 @@
             text
             @click="closeDelete"
           >
-            Cerrar
+            Cancelar
           </v-btn>
         </v-card-actions>
       </v-card>
