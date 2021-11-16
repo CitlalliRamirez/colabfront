@@ -18,7 +18,8 @@
                 :color="color"
                 absolute
                 right
-                rounded="pill"
+                height="70"
+                rounded="0"
                 top
                 >
               {{ text }}

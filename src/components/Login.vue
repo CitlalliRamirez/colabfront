@@ -9,10 +9,12 @@
                             v-model="snackbar"
                             :timeout="timeout"
                             :value="true"
+                            height="70"
+                            font-weight="bold"
                             color="red"
                             absolute
                             right
-                            rounded="pill"
+                            rounded="0"
                             top
                             >
                             {{ text }}
@@ -37,7 +39,7 @@
                               v-model="login"
                               prepend-icon="mdi-account"
                               name="login"
-                              label="ID"
+                              label="ID de usuario"
                               type="text"
                               :rules="ruleLogin"
                               required

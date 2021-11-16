@@ -12,6 +12,16 @@
     >
       <v-toolbar-title>Lista de chats</v-toolbar-title>
       <v-spacer></v-spacer>
+      <div style="width:130px">
+      <v-btn
+        depressed
+        small
+        color="primary"
+      >
+      Ver historial
+      </v-btn>
+      </div>
+      <div>
       <v-btn
         depressed
         small
@@ -21,6 +31,7 @@
       >
       Agregar
       </v-btn>
+      </div>
     </v-toolbar>
     <v-card-title>
       <v-spacer></v-spacer>
