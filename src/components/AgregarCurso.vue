@@ -8,7 +8,7 @@
       color="blue"
       dark
     >
-      <v-toolbar-title>Agregar curso</v-toolbar-title>
+      <v-toolbar-title>Registrar curso</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
   <v-card-text>

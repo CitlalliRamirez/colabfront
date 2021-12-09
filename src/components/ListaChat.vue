@@ -17,6 +17,7 @@
         depressed
         small
         color="primary"
+        @click="oculta"
       >
       Ver historial
       </v-btn>
@@ -84,6 +85,7 @@
       <v-btn
       depressed
       small
+      :disabled="item.hab"
       @click="ventanaChat"
       >
       Entrar
@@ -126,6 +128,61 @@
                     <span>Campo obligatorio</span>
                     </v-tooltip>
 
+                  <v-menu
+          ref="menu1"
+          v-model="menu1"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="dateFormatted"
+              label="Fecha"
+              persistent-hint
+              v-bind="attrs"
+              @blur="date = parseDate(dateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="date"
+            no-title
+            locale="es"
+            @input="menu1 = false"
+          ></v-date-picker>
+        </v-menu>
+
+        <v-menu
+        ref="menu"
+        :close-on-content-click="false"
+        :nudge-right="40"
+        
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-model="time"
+            label="Hora"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-time-picker
+          v-model="time"
+          full-width
+          ref="picker"
+          @click:hour="selectingHourIfUseHoursOnly"
+        ></v-time-picker>
+      </v-menu>
+
+  
                     <v-select
                         @change="deshabilitar($event)"
                         v-model="editedItem.editor"
@@ -228,7 +285,9 @@ export default {
    name: 'ListaChat',
     data:()=>({
         ocultarT:false,
+        dis: true,
         search: '',
+        menu1: false,
         items:[],
         items2:[],
         dialog:false,
@@ -253,10 +312,13 @@ export default {
         ],
         datosResponse : null,
         datosTabla: [],
+        time: null,
+        date:null,
+        dateFormatted:null,
         editedItem: {
           id:0,
           nombre: '',
-          editor: 0,
+          editor: 10,
           moderador: 0,
           observador:0,
         },
@@ -273,7 +335,91 @@ export default {
         return this.editedIndex === -1 ? 'Nuevo chat' : 'Editar chat'
       },
     },
+    watch: {
+       date(val){
+        this.items = []
+        this.items2 = []
+        this.dateFormatted = this.formatDate(this.date)
+        let curso = new FormData()
+        curso.append("id",this.editedItem.id)
+        console.log("ed",this.editedItem.id)
+        curso.append("fecha", val)
+        let h = this.formatTime(this.time)
+        curso.append("hora",h)
+        const path = `${this.$hostname}/backtablas/listae`
+        axios.post(path,curso).then((response) => {
+             this.datosResponse = response.data
+             console.log("lista",response.data)
+            for (let i = 0; i < this.datosResponse.length; i++) {
+            this.items.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})
+            this.items2.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})                
+         
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+
+      },
+      time(val){
+        this.items = []
+        this.items2 = []
+        this.dateFormatted = this.formatDate(this.date)
+        let curso = new FormData()
+        curso.append("id",this.editedItem.id)
+        curso.append("fecha", this.date)
+        let h = this.formatTime(val)
+        curso.append("hora",h)
+        const path = `${this.$hostname}/backtablas/listae`
+        axios.post(path,curso).then((response) => {
+             this.datosResponse = response.data
+             console.log("lista",response.data)
+            for (let i = 0; i < this.datosResponse.length; i++) {
+            this.items.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})
+            this.items2.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})                
+         
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+
+      }
+    },
     methods:{
+      parseDate (date) {
+        if (!date) return null
+
+        const [month, day, year] = date.split('/')
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+      },
+      selectingHourIfUseHoursOnly() {
+      if (this.useHoursOnly) {
+        this.$nextTick(() => {
+          this.$refs.picker.selectingHour = true;
+        });
+      }
+    },
+      formatTime (time){
+        if (!time) return null
+
+        const [horas, minutos] = time.split(':')
+        return `${horas}:${minutos}:00`
+      },
+       formatDate (date) {
+        if (!date) return null
+
+        const [year, month, day] = date.split('-')
+        return `${month}/${day}/${year}`
+      },
       ventanaChat(){
         let token = this.$session.get('jwt')
         let datosUsuario = jwt_decode(token)
@@ -298,6 +444,9 @@ export default {
       },
       ocultarListaCh(){
           this.$emit("ocultarListaCh")
+      },
+      oculta(){
+          this.$emit("oculta")
       },
       deshabilitar(event){
             
@@ -370,22 +519,30 @@ export default {
         },
         //////editar
       editItem (item) {
-        console.log("item",item)
+        console.log("ITEM:",item)
         this.editedIndex = this.datosTabla.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.editedItemResp = Object.assign({}, item)
+        const [fechita, horita] = item.fecha.split(' ')
+        this.time = horita
+        this.date = fechita
+        this.dateFormatted = this.formatDate(this.date)
         let datitos = []
+        console.log(this.dateFormatted)
         datitos.push(this.editedItem.editor)
         datitos.push(this.editedItem.moderador)
         for(let k=0;k<this.editedItem.observador.length;k++){
              datitos.push(this.editedItem.observador[k])
         }
-        console.log(datitos)
+        
         const pathPP = `${this.$hostname}/backtablas/listae`
         let idd = new FormData()
         idd.append("id",item.id)
+        idd.append("fecha", fechita)
+        idd.append("hora",horita)
         axios.post(pathPP,idd).then((response) => {
             this.datosResponse = response.data
+            console.log(this.datosResponse)
             for (let i = 0; i < this.datosResponse.length; i++) {
                 let vt =datitos.includes(this.datosResponse[i].id) 
                 this.items.push({"id":this.datosResponse[i].id,
@@ -480,14 +637,38 @@ export default {
         const path = `${this.$hostname}/backtablas/listadocurso/listadochat`
         axios.post(path,curso).then((response) => {
        this.datosResponse = response.data
-       console.log(response.data)
-       for (let i = 0; i < this.datosResponse.length; i++) {
-         this.datosTabla.push({"id":this.datosResponse[i].id,
+       for (let i = 0; i < this.datosResponse.length; i++) {   
+          const [hor, minu, segu] = this.datosResponse[i].hora.split(':')   
+          var hoy = new Date()
+          var hoyr = new Date()
+        
+          var horaInicial = hoy.getHours()<10?"0"+hoy.getHours():hoy.getHours()    
+          var horaFinal =  (hoyr.getHours()+1)<10?"0"+(hoyr.getHours()+1):(hoyr.getHours()+1)
+          var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
+          if(hor>=horaInicial && hor<horaFinal && this.datosResponse[i].fecha>=FechaActual){
+          console.log("entra",horaInicial,horaFinal,hor,minu,segu)
+          this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
-                               "fecha":this.datosResponse[i].fecha,
+                               "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
                                "editor":this.datosResponse[i].editor,
                                "moderador":this.datosResponse[i].moderador,
-                               "observador":this.datosResponse[i].observador})
+                               "observador":this.datosResponse[i].observador,
+                               "hab":false})
+
+        }else if (hor>=horaFinal && this.datosResponse[i].fecha>=FechaActual){
+          console.log("entra pero inactivo")
+          this.datosTabla.push({"id":this.datosResponse[i].id,
+                               "nombre":this.datosResponse[i].nombre,
+                               "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
+                               "editor":this.datosResponse[i].editor,
+                               "moderador":this.datosResponse[i].moderador,
+                               "observador":this.datosResponse[i].observador,
+                               "hab":true})
+        }else{
+          console.log("NO se pinta")
+        }
+            
+        
        }
        
      })

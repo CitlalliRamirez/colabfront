@@ -15,6 +15,8 @@
     </v-toolbar>
     <v-card-title>
       <v-spacer></v-spacer>
+      
+
       <v-text-field
         v-model="search"
         append-icon="mdi-magnify"
@@ -22,6 +24,22 @@
         single-line
         hide-details
       ></v-text-field>
+        
+    </v-card-title>
+      <v-card-title>
+        
+      <v-row>
+        <v-col sm="9"></v-col>
+        <v-col sm="3">
+      <v-select
+          @change="mostrarCarrera()"
+          :items="itemsC"
+          v-model="seleccionaCarrera"
+          label="Carrera"
+          dense
+        ></v-select>
+        </v-col>
+      </v-row>
     </v-card-title>
     <v-data-table
       :headers="headers"
@@ -191,7 +209,9 @@ export default {
         ocultarEl:false,
         ocultarEn:false,
         editedIndex: -1,
+        seleccionaCarrera:null,
         items3:[],
+        itemsC: ['Ing. Computación', 'Ing. Civil', 'Ing. Industrial', 'Lic. Matemáticas'],
         datosCurso: {curso_nombre:'',profesor:0},
         nameRules: [
           v => !!v || 'Campo obligatorio',
@@ -279,6 +299,37 @@ export default {
         this.$emit("ocultarListaC")
         this.$root.$emit("ocultarselect")
         this.$session.set("idcurso",item)
+      },
+      mostrarCarrera(){
+        console.log("carrera",this.seleccionaCarrera)
+        this.datosTabla = []
+         let token = this.$session.get('jwt')
+     let datosUsuario = jwt_decode(token)
+     let tipo =datosUsuario.Tipo  
+     let idU = datosUsuario.Id
+     const path = `${this.$hostname}/backtablas/listadocurso`
+     let datos = new FormData()
+     datos.append("tipo",tipo)
+     datos.append("idU",idU)
+     axios.post(path,datos).then((response) => {
+       this.datosResponse = response.data
+       console.log(this.datosResponse)
+       for (let i = 0; i < this.datosResponse.length; i++) {
+         console.log(this.datosResponse[i].carrera)
+         if(this.seleccionaCarrera==this.datosResponse[i].carrera){
+         this.datosTabla.push({"id":this.datosResponse[i].id,
+                               "nombre":this.datosResponse[i].nombre,
+                               "semestre":this.datosResponse[i].semestre,
+                               "carrera":this.datosResponse[i].carrera,
+                               "profesor":this.datosResponse[i].idprofesor})
+         }
+         
+       }
+       
+     })
+     .catch((error) => {
+       console.log(error)
+     })
       }
 
     },
@@ -337,5 +388,11 @@ export default {
 <style>
 .encab{
     border: 1px solid gray;
+}
+
+.esp{
+  float: right;
+  
+  display: block;
 }
 </style>

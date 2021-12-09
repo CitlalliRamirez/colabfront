@@ -39,6 +39,60 @@
     <span>Campo obligatorio</span>
     </v-tooltip>
 
+    <v-menu
+          ref="menu1"
+          v-model="menu1"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="dateFormatted"
+              label="Fecha"
+              persistent-hint
+              v-bind="attrs"
+              @blur="date = parseDate(dateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="date"
+            no-title
+            locale="es"
+            @input="menu1 = false"
+          ></v-date-picker>
+        </v-menu>
+
+        <v-menu
+        ref="menu"
+        :close-on-content-click="false"
+        :nudge-right="40"
+        
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-model="time"
+            label="Hora"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-time-picker
+          v-model="time"
+          full-width
+          ref="picker"
+          @click:hour="selectingHourIfUseHoursOnly"
+        ></v-time-picker>
+      </v-menu>
+
     <v-select
       @change="deshabilitar($event)"
       v-model="datosForm.editor"
@@ -72,6 +126,8 @@
       multiple
       required
     ></v-select>
+
+
     <v-card-actions>
     <v-spacer></v-spacer>
     <v-btn
@@ -124,8 +180,14 @@ import axios from 'axios'
 
 export default {
    name: 'AgregarChat',
-   data: () => ({
+   data: (vm) => ({
+     useHoursOnly: true,
      dialogDelete: false,
+      date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+      dateFormatted: vm.formatDate((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)),
+      menu1: false,
+      time: "08:00",
+      time2:null,
       datosForm: {nombre:'',editor:0 ,moderador:0,observadores:0},
       datosCurso: {curso_nombre:'',profesor:0},
       datosAC:{curso:0,alumno:0},
@@ -139,8 +201,90 @@ export default {
       items2: [],
       items3: [],
     }),
+    watch: {
+       date(val){
+        this.items = []
+        this.items2 = []
+        this.dateFormatted = this.formatDate(this.date)
+        let curso = new FormData()
+        curso.append("id",this.$session.get("idcurso"))
+        curso.append("fecha", val)
+        let h = this.formatTime(this.time)
+        curso.append("hora",h)
+        const path = `${this.$hostname}/backtablas/lista`
+        axios.post(path,curso).then((response) => {
+             this.datosResponse = response.data
+             console.log("lista",response.data)
+            for (let i = 0; i < this.datosResponse.length; i++) {
+            this.items.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})
+            this.items2.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})                
+         
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
 
+      },
+      time(val){
+        this.items = []
+        this.items2 = []
+        this.dateFormatted = this.formatDate(this.date)
+        let curso = new FormData()
+        curso.append("id",this.$session.get("idcurso"))
+        curso.append("fecha", this.date)
+        let h = this.formatTime(val)
+        curso.append("hora",h)
+        const path = `${this.$hostname}/backtablas/lista`
+        axios.post(path,curso).then((response) => {
+             this.datosResponse = response.data
+             console.log("lista",response.data)
+            for (let i = 0; i < this.datosResponse.length; i++) {
+            this.items.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})
+            this.items2.push({"id":this.datosResponse[i].id,
+                            "nombre":this.datosResponse[i].nombre,
+                            "disabled": false})                
+         
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+
+      }
+    },
     methods: {
+      selectingHourIfUseHoursOnly() {
+      if (this.useHoursOnly) {
+        this.$nextTick(() => {
+          this.$refs.picker.selectingHour = true;
+        });
+      }
+    },
+      formatTime (time){
+        if (!time) return null
+
+        const [horas, minutos] = time.split(':')
+        return `${horas}:${minutos}:00`
+      },
+      formatDate (date) {
+        if (!date) return null
+
+        const [year, month, day] = date.split('-')
+        return `${month}/${day}/${year}`
+      },
+      parseDate (date) {
+        if (!date) return null
+
+        const [month, day, year] = date.split('/')
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+      },
         ocultaAgr(){
           this.$emit("ocultaAgr")
         },
@@ -220,7 +364,7 @@ export default {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
         if(vari==true){
-            this.guardarChat()
+           this.guardarChat()
         }
       },
       cancelar(){
@@ -232,10 +376,13 @@ export default {
           let chat = new FormData()
           chat.append("idcurso",this.$session.get("idcurso"))
           chat.append("nombre",this.datosForm.nombre)
+          chat.append("fecha",this.date)
+          chat.append("hora",this.time)
           chat.append("editor",this.datosForm.editor)
           chat.append("moderador",this.datosForm.moderador)
           chat.append("observadores",this.datosForm.observadores)
-          axios.post(path,chat).then((response) => {
+          console.log(this.date, this.time,this.datosForm)
+           axios.post(path,chat).then((response) => {
                 console.log("ok",response.data)
                 this.$refs.form.reset()
                 this.$emit("agregarTabla",3)
@@ -249,12 +396,16 @@ export default {
       }
     },
     mounted(){
-          let curso = new FormData()
-          curso.append("id",this.$session.get("idcurso"))
-          const path = `${this.$hostname}/backtablas/lista`
-          axios.post(path,curso).then((response) => {
+        this.dateFormatted = this.formatDate(this.date)
+        let curso = new FormData()
+        curso.append("id",this.$session.get("idcurso"))
+        curso.append("fecha", this.date)
+        let h = this.formatTime(this.time)
+        curso.append("hora",h)
+        const path = `${this.$hostname}/backtablas/lista`
+        axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log(response.data)
+             console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -267,9 +418,18 @@ export default {
           })
           .catch((error)=>{
             console.log(error)
-            //this.$emit("agregarTabla",-1)
           })
     },
+    computed:{
+      computedDateFormatted () {
+        return this.formatDate(this.date)
+      },
+    }
+    /**watch: {
+      date () {
+        this.dateFormatted = this.formatDate(this.date)
+      },
+    }**/
 
 }
 </script>
