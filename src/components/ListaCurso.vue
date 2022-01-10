@@ -34,6 +34,7 @@
       <v-select
           @change="mostrarCarrera()"
           :items="itemsC"
+          v-if="ocultarCarrerita"
           v-model="seleccionaCarrera"
           label="Carrera"
           dense
@@ -204,7 +205,8 @@ import jwt_decode from 'jwt-decode'
 export default {
    name: 'ListaCurso',
    data: () => ({
-        dialog: false,
+       dialog: false,
+        ocultarCarrerita:false,
         ocultarEd: false,
         ocultarEl:false,
         ocultarEn:false,
@@ -371,16 +373,21 @@ export default {
             console.log(error)
         })  
       
-      if(tipo=="Administrador"){
+        if (tipo == "Administrador") { 
         this.ocultarEd = true
         this.ocultarEl = true
         this.ocultarEn = false
 
-      }else{
+        } else {
         this.ocultarEd = false
         this.ocultarEl = false
         this.ocultarEn = true
-      }
+        }
+        if (tipo == "Alumno") {
+            this.ocultarCarrerita = false
+        } else {
+            this.ocultarCarrerita =true
+        }
     },
 }
 </script>

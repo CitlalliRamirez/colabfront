@@ -60,6 +60,7 @@
           </template>
           <v-date-picker
             v-model="date"
+            :allowed-dates="allowedDates"
             no-title
             locale="es"
             @input="menu1 = false"
@@ -90,6 +91,8 @@
           full-width
           ref="picker"
           @click:hour="selectingHourIfUseHoursOnly"
+          class="custom-time-picker"
+          :class="{ 'use-hours-only': useHoursOnly }"
         ></v-time-picker>
       </v-menu>
 
@@ -260,6 +263,10 @@ export default {
       }
     },
     methods: {
+        allowedDates(val) {
+            let fechaAc = new Date()
+            return parseInt(val.split('-')[2], 10) > fechaAc.getDate()-1
+        },
       selectingHourIfUseHoursOnly() {
       if (this.useHoursOnly) {
         this.$nextTick(() => {
@@ -435,4 +442,12 @@ export default {
 </script>
 
 <style>
+    .custom-time-picker .v-time-picker-title {
+        justify-content: center;
+    }
+
+    .custom-time-picker.use-hours-only .v-time-picker-title {
+        pointer-events: none;
+    }
+ 
 </style>
