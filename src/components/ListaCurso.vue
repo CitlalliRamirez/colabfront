@@ -213,7 +213,7 @@ export default {
         editedIndex: -1,
         seleccionaCarrera:null,
         items3:[],
-        itemsC: ['Ing. Computación', 'Ing. Civil', 'Ing. Industrial', 'Lic. Matemáticas'],
+        itemsC: ['Todos','Ing. Computación', 'Ing. Civil', 'Ing. Industrial', 'Lic. Matemáticas Aplicadas','Ing. Diseño','Ing. Alimentos','Ing. Electrónica','Lic. Ciencias Empresariales','Ing. Mecatrónica','Ing. Física Aplicada','Ing. Mécanica Automitriz'],
         datosCurso: {curso_nombre:'',profesor:0},
         nameRules: [
           v => !!v || 'Campo obligatorio',
@@ -316,6 +316,18 @@ export default {
      axios.post(path,datos).then((response) => {
        this.datosResponse = response.data
        console.log(this.datosResponse)
+       if(this.seleccionaCarrera=="Todos"){
+         for (let i = 0; i < this.datosResponse.length; i++) {
+         console.log(this.datosResponse[i].carrera)
+         this.datosTabla.push({"id":this.datosResponse[i].id,
+                               "nombre":this.datosResponse[i].nombre,
+                               "semestre":this.datosResponse[i].semestre,
+                               "carrera":this.datosResponse[i].carrera,
+                               "profesor":this.datosResponse[i].idprofesor})
+         
+         
+       }//
+       }else{
        for (let i = 0; i < this.datosResponse.length; i++) {
          console.log(this.datosResponse[i].carrera)
          if(this.seleccionaCarrera==this.datosResponse[i].carrera){
@@ -326,6 +338,7 @@ export default {
                                "profesor":this.datosResponse[i].idprofesor})
          }
          
+       }//
        }
        
      })

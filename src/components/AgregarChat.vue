@@ -208,6 +208,7 @@ export default {
        date(val){
         this.items = []
         this.items2 = []
+        this.datosForm = {nombre:'',editor:0 ,moderador:0,observadores:0}
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.$session.get("idcurso"))
@@ -236,6 +237,7 @@ export default {
       time(val){
         this.items = []
         this.items2 = []
+        this.datosForm = {nombre:'',editor:0 ,moderador:0,observadores:0}
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.$session.get("idcurso"))

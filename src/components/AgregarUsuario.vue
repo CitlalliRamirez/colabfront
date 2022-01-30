@@ -160,11 +160,22 @@ export default {
         'Quinto',
         'Sexto',
         'Séptimo',
+        'Octavo',
+        'Noveno',
+        'Décimo'
       ],
       items3: [
         'Ing. Computación',
         'Ing. Industrial',
         'Ing. Civil',
+        'Lic. Matemáticas Aplicadas',
+        'Ing. Diseño',
+        'Ing. Alimentos',
+        'Ing. Electrónica',
+        'Lic. Ciencias Empresariales',
+        'Ing. Mecatrónica',
+        'Ing. Física Aplicada',
+        'Ing. Mécanica Automitriz'
       ],
       checkbox: false,
     }),

@@ -128,12 +128,20 @@ export default {
         'Séptimo',
         'Octavo',
         'Noveno',
-        'Décimo',
+        'Décimo'
       ],
       items2: [
         'Ing. Computación',
         'Ing. Industrial',
         'Ing. Civil',
+        'Lic. Matemáticas Aplicadas',
+        'Ing. Diseño',
+        'Ing. Alimentos',
+        'Ing. Electrónica',
+        'Lic. Ciencias Empresariales',
+        'Ing. Mecatrónica',
+        'Ing. Física Aplicada',
+        'Ing. Mécanica Automitriz'
       ],
       items3: [],
     }),
