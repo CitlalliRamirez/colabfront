@@ -175,6 +175,29 @@
       </v-card>
     </v-dialog>
     <!----->
+    <v-dialog
+      v-model="dialogAlumnInsuf"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          Nota chat
+        </v-card-title>
+        <v-card-text>El chat no se registrará, porque no hay alumnos suficientes para la hora y fecha seleccionada</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="gray"
+            text
+            @click="closeAlumn"
+          >
+            Aceptar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!---->
   </v-container>
 </template>
 
@@ -186,6 +209,7 @@ export default {
    data: (vm) => ({
      useHoursOnly: true,
      dialogDelete: false,
+     dialogAlumnInsuf:false,
       date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       dateFormatted: vm.formatDate((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)),
       menu1: false,
@@ -208,7 +232,9 @@ export default {
        date(val){
         this.items = []
         this.items2 = []
-        this.datosForm = {nombre:'',editor:0 ,moderador:0,observadores:0}
+        this.datosForm.editor=0
+        this.datosForm.moderador=0
+        this.datosForm.observadores=0
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.$session.get("idcurso"))
@@ -237,7 +263,9 @@ export default {
       time(val){
         this.items = []
         this.items2 = []
-        this.datosForm = {nombre:'',editor:0 ,moderador:0,observadores:0}
+        this.datosForm.editor=0
+        this.datosForm.moderador=0
+        this.datosForm.observadores=0
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.$session.get("idcurso"))
@@ -265,7 +293,19 @@ export default {
       }
     },
     methods: {
-        allowedDates(val) {
+
+      contadorAlumnosH(){
+        var cont = 0;
+        for(let i=0;i<this.items.length;i++){
+          if(this.items[i].disabled==false){
+            cont = cont+1;
+          }
+        }
+        if(cont==0 && (this.datosForm.editor==0 || this.datosForm.moderador==0 || this.datosForm.observadores==0)){
+          this.dialogAlumnInsuf= true
+        }
+      },
+      allowedDates(val) {
             let fechaAc = new Date()
             return parseInt(val.split('-')[2], 10) > fechaAc.getDate()-1
         },
@@ -317,6 +357,7 @@ export default {
             }
             this.items[pos].disabled=true
              this.items2=JSON.parse(JSON.stringify(this.items))
+             this.contadorAlumnosH()
         },
         deshabilitar2(event){
             let posA = []
@@ -337,6 +378,7 @@ export default {
             }
             this.items[pos].disabled=true
             this.items2=JSON.parse(JSON.stringify(this.items))
+            this.contadorAlumnosH()
         },
         deshabilitarM(event){
             let posA = []
@@ -364,11 +406,15 @@ export default {
                 this.items[pos].disabled=true
                 
             }
+            this.contadorAlumnosH()
             
         },
         close () {
           this.dialogDelete = false
         },
+        closeAlumn () {
+        this.dialogAlumnInsuf = false
+      },
         validate (evt) {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
@@ -396,6 +442,7 @@ export default {
                 this.$refs.form.reset()
                 this.$emit("agregarTabla",3)
                 this.$root.$emit("actualizaSelect")
+                this.$root.$emit("actualizaLAlum")
           })
           .catch((error)=>{
             console.log(error)
@@ -428,6 +475,11 @@ export default {
           .catch((error)=>{
             console.log(error)
           })
+          this.$root.$on("actualizaLAlum",()=>{
+            this.datosForm.editor=0
+            this.datosForm.moderador=0
+            this.datosForm.observadores=0
+      })
     },
     computed:{
       computedDateFormatted () {

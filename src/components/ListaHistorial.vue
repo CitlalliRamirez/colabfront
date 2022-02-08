@@ -37,7 +37,7 @@
       depressed
       small
       :disabled="item.hab"
-      @click="ventanaChat"
+      @click="ventanaChat(item)"
       >
       Entrar
       <v-icon
@@ -87,11 +87,27 @@ export default {
         datosTabla: [],
         time: null,
         date:null,
+        timee:null,
+        datee:null,
         dateFormatted:null,
+        editedIndexP:{
+          id:0,
+          nombre: '',
+          editor: 0,
+          moderador: 0,
+          observador:0,
+        },
+        editedItemP:{
+          id:0,
+          nombre: '',
+          editor: 0,
+          moderador: 0,
+          observador:0,
+        },
         editedItem: {
           id:0,
           nombre: '',
-          editor: 10,
+          editor: 0,
           moderador: 0,
           observador:0,
         },
@@ -134,27 +150,62 @@ export default {
         const [year, month, day] = date.split('-')
         return `${month}/${day}/${year}`
       },
-      ventanaChat(){
+      ventanaChat(item){
         let token = this.$session.get('jwt')
         let datosUsuario = jwt_decode(token)
         let tipo =datosUsuario.Tipo 
-        const path = `${this.$hostname}/backtablas/rol`
-        if(tipo=="Profesor"){
+
+        this.editedIndexP = this.datosTabla.indexOf(item)
+        this.editedItemP = Object.assign({}, item)
+        const [fechita, horita] = item.fecha.split(' ')
+        this.timee = horita
+        this.datee = fechita
+        this.dateFormatted = this.formatDate(this.date)
+        let datitos = []
+        let nombres =' y los integrantes del equipo son: '
+        console.log(this.dateFormatted)
+        datitos.push(this.editedItemP.editor)
+        datitos.push(this.editedItemP.moderador)
+        for(let k=0;k<this.editedItemP.observador.length;k++){
+             datitos.push(this.editedItemP.observador[k])
+        }
+        const pathPP = `${this.$hostname}/backtablas/listae`
+        let idd = new FormData()
+        idd.append("id",item.id)
+        idd.append("fecha", fechita)
+        idd.append("hora",horita)
+        axios.post(pathPP,idd).then((response) => {
+            this.datosResponse = response.data
+            for (let i = 0; i < this.datosResponse.length; i++) {
+              if(datitos.includes(this.datosResponse[i].id)==true){
+                nombres = nombres+" - "+this.datosResponse[i].nombre
+              }
+            }
+            ///
+            const path = `${this.$hostname}/backtablas/rol`
+            if(tipo=="Profesor"){
           //mostrar y decir que es profesor
-          this.$emit("ventanachat","Profesor")
-        }else{
+            this.$emit("ventanachat","profesor"+nombres)
+            }else{
           //mostrar y decir que rol (editor,mod,observador)
-          let id = new FormData()
-          id.append("id",datosUsuario.Id)
-          axios.post(path,id).then((response)=>{
-            let rol = response.data
-            this.$emit("ventanachat",rol)
-          })
-          .catch((error)=>{
-            console.log(error)
-          })
+            let id = new FormData()
+            id.append("id",datosUsuario.Id)
+            axios.post(path,id).then((response)=>{
+              let rol = response.data
+              this.$emit("ventanachat",rol+nombres)
+            })
+            .catch((error)=>{
+              console.log(error)
+            })
           
         }
+            
+        })
+        .catch((error) => {
+            console.log(error)
+        })  
+        
+        
       },
      
       
@@ -184,10 +235,10 @@ export default {
           var horaInicial = hoy.getHours()<10?"0"+hoy.getHours():hoy.getHours()    
           var horaFinal =  (hoyr.getHours()+1)<10?"0"+(hoyr.getHours()+1):(hoyr.getHours()+1)
           var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
-          if(hor>=horaInicial && hor<horaFinal && this.datosResponse[i].fecha>=FechaActual){
+          if(hor>=horaInicial && hor<horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
           console.log("entra",horaInicial,horaFinal,hor,minu,segu)
 
-        }else if (hor>=horaFinal && this.datosResponse[i].fecha>=FechaActual){
+        }else if (Date.parse(this.datosResponse[i].fecha)>Date.parse(FechaActual)){
           console.log("entra pero inactivo")
           
         }else{

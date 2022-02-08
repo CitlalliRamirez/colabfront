@@ -86,7 +86,7 @@
       depressed
       small
       :disabled="item.hab"
-      @click="ventanaChat"
+      @click="ventanaChat(item)"
       >
       Entrar
       <v-icon
@@ -179,6 +179,8 @@
           full-width
           ref="picker"
           @click:hour="selectingHourIfUseHoursOnly"
+          class="custom-time-picker"
+          :class="{ 'use-hours-only':useHoursOnly}"
         ></v-time-picker>
       </v-menu>
 
@@ -286,6 +288,7 @@ export default {
     data:()=>({
         ocultarT:false,
         dis: true,
+        useHoursOnly: true,
         search: '',
         menu1: false,
         items:[],
@@ -314,11 +317,27 @@ export default {
         datosTabla: [],
         time: null,
         date:null,
+        timee:null,
+        datee:null,
         dateFormatted:null,
+        editedIndexP:{
+          id:0,
+          nombre: '',
+          editor: 0,
+          moderador: 0,
+          observador:0,
+        },
+        editedItemP:{
+           id:0,
+          nombre: '',
+          editor: 0,
+          moderador: 0,
+          observador:0,
+        },
         editedItem: {
           id:0,
           nombre: '',
-          editor: 10,
+          editor: 0,
           moderador: 0,
           observador:0,
         },
@@ -339,6 +358,9 @@ export default {
        date(val){
         this.items = []
         this.items2 = []
+        this.editedItem.editor=0
+        this.editedItem.moderador=0
+        this.editedItem.observador=0
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.editedItem.id)
@@ -368,12 +390,16 @@ export default {
       time(val){
         this.items = []
         this.items2 = []
+        this.editedItem.editor=0
+        this.editedItem.moderador=0
+        this.editedItem.observador=0
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.editedItem.id)
         curso.append("fecha", this.date)
         let h = this.formatTime(val)
         curso.append("hora",h)
+      
         const path = `${this.$hostname}/backtablas/listae`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
@@ -420,27 +446,60 @@ export default {
         const [year, month, day] = date.split('-')
         return `${month}/${day}/${year}`
       },
-      ventanaChat(){
+      ventanaChat(item){
         let token = this.$session.get('jwt')
         let datosUsuario = jwt_decode(token)
         let tipo =datosUsuario.Tipo 
-        const path = `${this.$hostname}/backtablas/rol`
-        if(tipo=="Profesor"){
+
+        this.editedIndexP = this.datosTabla.indexOf(item)
+        this.editedItemP = Object.assign({}, item)
+        const [fechita, horita] = item.fecha.split(' ')
+        this.timee = horita
+        this.datee = fechita
+        this.dateFormatted = this.formatDate(this.date)
+        let datitos = []
+        let nombres =' y los integrantes del equipo son: '
+        console.log(this.dateFormatted)
+        datitos.push(this.editedItemP.editor)
+        datitos.push(this.editedItemP.moderador)
+        for(let k=0;k<this.editedItemP.observador.length;k++){
+             datitos.push(this.editedItemP.observador[k])
+        }
+        const pathPP = `${this.$hostname}/backtablas/listae`
+        let idd = new FormData()
+        idd.append("id",item.id)
+        idd.append("fecha", fechita)
+        idd.append("hora",horita)
+        axios.post(pathPP,idd).then((response) => {
+            this.datosResponse = response.data
+            for (let i = 0; i < this.datosResponse.length; i++) {
+              if(datitos.includes(this.datosResponse[i].id)==true){
+                nombres = nombres+" - "+this.datosResponse[i].nombre
+              }
+            }
+            ///
+            const path = `${this.$hostname}/backtablas/rol`
+            if(tipo=="Profesor"){
           //mostrar y decir que es profesor
-          this.$emit("ventanachat","Profesor")
-        }else{
+            this.$emit("ventanachat","profesor"+nombres)
+            }else{
           //mostrar y decir que rol (editor,mod,observador)
-          let id = new FormData()
-          id.append("id",datosUsuario.Id)
-          axios.post(path,id).then((response)=>{
-            let rol = response.data
-            this.$emit("ventanachat",rol)
-          })
-          .catch((error)=>{
-            console.log(error)
-          })
+            let id = new FormData()
+            id.append("id",datosUsuario.Id)
+            axios.post(path,id).then((response)=>{
+              let rol = response.data
+              this.$emit("ventanachat",rol+nombres)
+            })
+            .catch((error)=>{
+              console.log(error)
+            })
           
         }
+            
+        })
+        .catch((error) => {
+            console.log(error)
+        })  
       },
       ocultarListaCh(){
           this.$emit("ocultarListaCh")
@@ -645,7 +704,8 @@ export default {
           var horaInicial = hoy.getHours()<10?"0"+hoy.getHours():hoy.getHours()    
           var horaFinal =  (hoyr.getHours()+1)<10?"0"+(hoyr.getHours()+1):(hoyr.getHours()+1)
           var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
-          if(hor>=horaInicial && hor<horaFinal && this.datosResponse[i].fecha>=FechaActual){
+          console.log("VER: ", hor,horaInicial,horaFinal,this.datosResponse[i].fecha,FechaActual)
+          if(hor>=horaInicial && hor<horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
           console.log("entra",horaInicial,horaFinal,hor,minu,segu)
           this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
@@ -655,7 +715,7 @@ export default {
                                "observador":this.datosResponse[i].observador,
                                "hab":false})
 
-        }else if (hor>=horaFinal && this.datosResponse[i].fecha>=FechaActual){
+        }else if (Date.parse(this.datosResponse[i].fecha)>Date.parse(FechaActual)){
           console.log("entra pero inactivo")
           this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
@@ -691,4 +751,12 @@ export default {
 .encab{
     border: 1px solid gray;
 }
+.custom-time-picker .v-time-picker-title {
+        justify-content: center;
+    }
+
+    .custom-time-picker.use-hours-only .v-time-picker-title {
+        pointer-events: none;
+    }
+ 
 </style>
