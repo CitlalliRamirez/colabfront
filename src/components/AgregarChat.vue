@@ -509,7 +509,7 @@ export default {
     created(){
       console.log("starting")
       var that = this
-      this.connection = new WebSocket("ws://colabwebsocket.herokuapp.com")
+      this.connection = new WebSocket("wss://colabwebsocket.herokuapp.com")
 
       this.connection.onopen = function(event){
         console.log(event)
