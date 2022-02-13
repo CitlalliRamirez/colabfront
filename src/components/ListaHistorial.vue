@@ -23,7 +23,17 @@
         hide-details
       ></v-text-field>
     </v-card-title>
+    <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
     <v-data-table
+     v-if="!carga"
       :headers="headers"
       :items="datosTabla"
       :search="search"
@@ -61,6 +71,7 @@ export default {
     data:()=>({
         ocultarT:false,
         search: '',
+        carga: true,
         items:[],
         items2:[],
         dialog:false,
@@ -163,7 +174,6 @@ export default {
         this.dateFormatted = this.formatDate(this.date)
         let datitos = []
         let nombres =' y los integrantes del equipo son: '
-        console.log(this.dateFormatted)
         datitos.push(this.editedItemP.editor)
         datitos.push(this.editedItemP.moderador)
         for(let k=0;k<this.editedItemP.observador.length;k++){
@@ -236,13 +246,15 @@ export default {
           var horaFinal =  (hoyr.getHours()+1)<10?"0"+(hoyr.getHours()+1):(hoyr.getHours()+1)
           var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
           if(hor>=horaInicial && hor<horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
-          console.log("entra",horaInicial,horaFinal,hor,minu,segu)
+          console.log("entra",minu,segu)
 
         }else if (Date.parse(this.datosResponse[i].fecha)>Date.parse(FechaActual)){
           console.log("entra pero inactivo")
           
-        }else{
-          console.log("Pertenece a historial")
+        }else if(hor>=horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
+          console.log("entra pero inactivo")
+        }
+          else{
           this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
                                "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
@@ -254,7 +266,7 @@ export default {
             
         
        }
-       
+       this.carga= false
      })
      .catch((error) => {
        console.log(error)

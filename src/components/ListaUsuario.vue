@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    
     <v-card
     class="mx-auto"
     max-width="1200"
@@ -23,7 +24,17 @@
         hide-details
       ></v-text-field>
     </v-card-title>
+    <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
     <v-data-table
+      v-if="!carga"
       :headers="headers"
       :items="datosTabla"
       :search="search"
@@ -195,6 +206,7 @@ export default {
    name: 'ListaUsuario',
    data: () => ({
         dialog: false,
+        carga: true,
         editedIndex: -1,
         datosUsuario: {usuario_correo:'',usuario_contrasena:''},
         datosAdmin: {
@@ -263,6 +275,7 @@ export default {
         this.dialogDelete= true
       },
       confirmDelete(){
+        this.carga = true
         const path = `${this.$hostname}/backtablas/usuarios/${this.itemId}/`
         axios.delete(path).then((response) => {
           console.log("ok",response.data)
@@ -278,6 +291,7 @@ export default {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
         if(vari==true){
+           this.carga = true
             this.actualizar()
         }
       },
@@ -373,6 +387,7 @@ export default {
                                "idtipo":this.datosResponse[i].idtipo})
          
        }
+        this.carga= false
        
      })
      .catch((error) => {

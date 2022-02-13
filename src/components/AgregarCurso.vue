@@ -1,8 +1,18 @@
 <template>
   <v-container>
+      <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
   <v-card
     class="mx-auto"
     max-width="1200"
+    v-if="!carga"
     outlined>
   <v-toolbar
       color="blue"
@@ -110,6 +120,7 @@ export default {
    name: 'AgregarCurso',
    data: () => ({
      dialogDelete: false,
+      carga:false,
       datosForm: {nombre:'',semestre:'',carrera:'',profesor:''},
       datosCurso: {curso_nombre:'',profesor:0},
       datosAC:{curso:0,alumno:0},
@@ -162,6 +173,7 @@ export default {
         this.$root.$emit("inicio") //devuelva a la pagina de inicio
       },
       guardarCurso(){
+        this.carga = true
           let curso = new FormData()
           curso.append("nombre",this.datosForm.nombre)
           curso.append("semestre",this.datosForm.semestre)
@@ -171,11 +183,12 @@ export default {
           console.log(crftoken)
           const path = `${this.$hostname}/backtablas/guarda`
           axios.post(path,curso).then((response) => {
-            console.log(response.data) 
+            //console.log(response.data) 
             if(response.data=='ok'){
-                this.$refs.form.reset()
+                //this.$refs.form.reset()
                 this.$emit("agregarTabla",2)
                 this.$root.$emit("actualizaSelect")
+                this.carga=false
             }else{
                 this.dialogDelete = true
             }
@@ -190,7 +203,7 @@ export default {
         const path = `${this.$hostname}/backtablas/profesores/`
         axios.get(path).then((response) => {
             this.datosResponse = response.data
-            console.log(this.datosResponse)
+            //console.log(this.datosResponse)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items3.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].profesor_nombre})

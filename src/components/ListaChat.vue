@@ -44,7 +44,17 @@
         hide-details
       ></v-text-field>
     </v-card-title>
+    <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
     <v-data-table
+      v-if="!carga"
       :headers="headers"
       :items="datosTabla"
       :search="search"
@@ -101,6 +111,7 @@
    <v-dialog
           v-model="dialog"
           max-width="500px"
+          
         >
         <v-card>
           <v-toolbar
@@ -108,10 +119,20 @@
               dark
           >
       <v-toolbar-title>{{formTitle}}</v-toolbar-title>
+        <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
       </v-toolbar>
             <v-card-text>
               <br/>
               <v-form
+              v-if="!carga"
               ref="form">
                     <v-tooltip right
                     color="red">
@@ -288,6 +309,8 @@ export default {
     data:()=>({
         ocultarT:false,
         dis: true,
+        carga:true,
+        activaChat: false,
         useHoursOnly: true,
         search: '',
         menu1: false,
@@ -355,23 +378,24 @@ export default {
       },
     },
     watch: {
-       date(val){
-        this.items = []
-        this.items2 = []
+     date(val){
+       if (this.activaChat==false){
+         this.items.splice(0,this.items.length)
+        this.items2.splice(0,this.items2.length)
         this.editedItem.editor=0
         this.editedItem.moderador=0
         this.editedItem.observador=0
         this.dateFormatted = this.formatDate(this.date)
         let curso = new FormData()
         curso.append("id",this.editedItem.id)
-        console.log("ed",this.editedItem.id)
+        console.log("edi",this.editedItem.id)
         curso.append("fecha", val)
         let h = this.formatTime(this.time)
         curso.append("hora",h)
         const path = `${this.$hostname}/backtablas/listae`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log("lista",response.data)
+             //console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -381,15 +405,19 @@ export default {
                             "disabled": false})                
          
             }
+            console.log("WATCH",this.items,this.items2)
           })
           .catch((error)=>{
             console.log(error)
           })
+       }
+        
 
       },
       time(val){
-        this.items = []
-        this.items2 = []
+        if(this.activaChat==false){
+          this.items.splice(0,this.items.length)
+        this.items2.splice(0,this.items2.length)
         this.editedItem.editor=0
         this.editedItem.moderador=0
         this.editedItem.observador=0
@@ -399,11 +427,11 @@ export default {
         curso.append("fecha", this.date)
         let h = this.formatTime(val)
         curso.append("hora",h)
-      
+        console.log("ediss")
         const path = `${this.$hostname}/backtablas/listae`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log("lista",response.data)
+             //console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -413,10 +441,13 @@ export default {
                             "disabled": false})                
          
             }
+            console.log("WATCH",this.items,this.items2)
           })
           .catch((error)=>{
             console.log(error)
           })
+        }
+        
 
       }
     },
@@ -459,7 +490,7 @@ export default {
         this.dateFormatted = this.formatDate(this.date)
         let datitos = []
         let nombres =' y los integrantes del equipo son: '
-        console.log(this.dateFormatted)
+        //console.log(this.dateFormatted)
         datitos.push(this.editedItemP.editor)
         datitos.push(this.editedItemP.moderador)
         for(let k=0;k<this.editedItemP.observador.length;k++){
@@ -578,7 +609,11 @@ export default {
         },
         //////editar
       editItem (item) {
-        console.log("ITEM:",item)
+        this.carga=true
+        this.activaChat = true
+        this.items.splice(0,this.items.length)
+        this.items2.splice(0,this.items2.length)
+        console.log("ITEM:",this.items,this.items2)
         this.editedIndex = this.datosTabla.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.editedItemResp = Object.assign({}, item)
@@ -587,7 +622,7 @@ export default {
         this.date = fechita
         this.dateFormatted = this.formatDate(this.date)
         let datitos = []
-        console.log(this.dateFormatted)
+        //console.log(this.dateFormatted)
         datitos.push(this.editedItem.editor)
         datitos.push(this.editedItem.moderador)
         for(let k=0;k<this.editedItem.observador.length;k++){
@@ -602,7 +637,7 @@ export default {
         axios.post(pathPP,idd).then((response) => {
             this.datosResponse = response.data
             console.log(this.datosResponse)
-            for (let i = 0; i < this.datosResponse.length; i++) {
+            for (let i = 0; i < this.datosResponse.length; i++) {                
                 let vt =datitos.includes(this.datosResponse[i].id) 
                 this.items.push({"id":this.datosResponse[i].id,
                                 "nombre":this.datosResponse[i].nombre,
@@ -611,6 +646,9 @@ export default {
                                 "nombre":this.datosResponse[i].nombre,
                                 "disabled": vt})
             }
+            this.activaChat=false
+            console.log("LA busqueda se realizó",this.items,this.items2)
+            this.carga=false
         })
         .catch((error) => {
             console.log(error)
@@ -632,6 +670,7 @@ export default {
         this.dialogDelete= true
       },
       confirmDelete(){ //eliminar chat
+        this.carga = true
         const path = `${this.$hostname}/backtablas/chats/${this.itemId}/`
         axios.delete(path).then((response) => {
           console.log("ok",response.data)
@@ -647,6 +686,7 @@ export default {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
         if(vari==true){
+            this.carga = true
             this.actualizar()
         }
       },
@@ -658,7 +698,7 @@ export default {
         this.editedItem.moderador=0
         this.editedItem.editor=0
         this.editedItem.observador=0
-        console.log("ed",this.editedItem)
+        //console.log("ed",this.editedItem)
       },
       actualizar(){//actualizar chat
           const path = `${this.$hostname}/backtablas/actualizarc`
@@ -704,9 +744,9 @@ export default {
           var horaInicial = hoy.getHours()<10?"0"+hoy.getHours():hoy.getHours()    
           var horaFinal =  (hoyr.getHours()+1)<10?"0"+(hoyr.getHours()+1):(hoyr.getHours()+1)
           var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
-          console.log("VER: ", hor,horaInicial,horaFinal,this.datosResponse[i].fecha,FechaActual)
+          //console.log("VER: ", hor,horaInicial,horaFinal,this.datosResponse[i].fecha,FechaActual)
           if(hor>=horaInicial && hor<horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
-          console.log("entra",horaInicial,horaFinal,hor,minu,segu)
+          console.log("entra sin bloqueo",minu,segu)
           this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
                                "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
@@ -716,7 +756,16 @@ export default {
                                "hab":false})
 
         }else if (Date.parse(this.datosResponse[i].fecha)>Date.parse(FechaActual)){
-          console.log("entra pero inactivo")
+          //console.log("entra pero inactivo")
+          this.datosTabla.push({"id":this.datosResponse[i].id,
+                               "nombre":this.datosResponse[i].nombre,
+                               "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
+                               "editor":this.datosResponse[i].editor,
+                               "moderador":this.datosResponse[i].moderador,
+                               "observador":this.datosResponse[i].observador,
+                               "hab":true})
+        }else if(hor>=horaFinal && Date.parse(this.datosResponse[i].fecha)==Date.parse(FechaActual)){
+          //console.log("entra pero inactivo")
           this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
                                "fecha":this.datosResponse[i].fecha+" "+this.datosResponse[i].hora,
@@ -725,12 +774,12 @@ export default {
                                "observador":this.datosResponse[i].observador,
                                "hab":true})
         }else{
-          console.log("NO se pinta")
+            console.log("no se pinta")
         }
             
         
        }
-       
+       this.carga= false
      })
      .catch((error) => {
        console.log(error)
@@ -743,6 +792,7 @@ export default {
         this.ocultarEd = false
         this.ocultarEl = false
       }
+      //
     }
 }
 </script>

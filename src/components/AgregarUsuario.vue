@@ -1,9 +1,20 @@
 <template>
   <v-container>
+    <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
   <v-card
     class="mx-auto"
     max-width="1200"
+     v-if="!carga"
     outlined>
+    
   <v-toolbar
       color="blue"
       dark
@@ -12,9 +23,11 @@
       <v-spacer></v-spacer>
     </v-toolbar>
   <v-card-text>
+    
   <v-form
     ref="form"
     lazy-validation
+   
   >
     <v-tooltip right
     color="red">
@@ -119,6 +132,7 @@ export default {
    data: () => ({
       ocultar: false,
       idU: 0,
+      carga:false,
       datosUsuario: {usuario_correo:'',usuario_contrasena:''},
       datosAdmin: {
           administrador_nombre:'',
@@ -200,6 +214,7 @@ export default {
         this.$root.$emit("inicio") //devuelva a la pagina de inicio
       },
     guardarUsuario (){
+        this.carga=true
         const pathU = `${this.$hostname}/backtablas/usuarios/`
         const pathAd = `${this.$hostname}/backtablas/administradores/`
         const pathPr = `${this.$hostname}/backtablas/profesores/`
@@ -221,11 +236,12 @@ export default {
             this.datosAdmin.usuario = this.idU
             axios.post(pathAd,this.datosAdmin).then((response) => {
                 console.log("Administrador Registrado",response.data.id)
-                this.$refs.form.reset()
+                //this.$refs.form.reset()
                 axios.post(pathEnvia,datoscorreo).then((response) => {
                   console.log(response.data)
                   this.$emit("agregarTabla",1)
                   this.$root.$emit("actualizaSelect")
+                  this.carga=false
                 })
                 .catch((error) => {
                   console.log(error)
@@ -241,11 +257,12 @@ export default {
             this.datosProf.usuario = this.idU
             axios.post(pathPr,this.datosProf).then((response) => {
                 console.log("Profesor Registrado",response.data.id)
-                this.$refs.form.reset()
+                //this.$refs.form.reset()
                 axios.post(pathEnvia,datoscorreo).then((response) => {
                   console.log(response.data)
                   this.$emit("agregarTabla",1)
                   this.$root.$emit("actualizaSelect")
+                  this.carga=false
                 })
                 .catch((error) => {
                   console.log(error)
@@ -269,9 +286,10 @@ export default {
               datosAlumnos.append("idcurso",response.data)
               axios.post(pathAl,this.datosAlum).then((response) => { //registra alumno
                   console.log("Alumno Registrado",response.data.id)
-                  this.$refs.form.reset()
+                  //this.$refs.form.reset()
                   this.$emit("agregarTabla",1)
                   this.$root.$emit("actualizaSelect")
+                  this.carga=false
                   ////insertar a curso
                   datosAlumnos.append("id",response.data.id)
                   axios.post(insertaCurso,datosAlumnos).then((response) => {

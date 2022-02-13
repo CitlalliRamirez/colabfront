@@ -1,8 +1,18 @@
 <template>
   <v-container>
+    <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
   <v-card
     class="mx-auto"
     max-width="1200"
+    v-if="!carga"
     outlined>
   <v-toolbar
       color="blue"
@@ -198,6 +208,29 @@
       </v-card>
     </v-dialog>
     <!---->
+    <v-dialog
+      v-model="dialogInfoSocket"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          Nota chat
+        </v-card-title>
+        <v-card-text>{{infoSocket}}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="gray"
+            text
+            @click="closeInfoSocket"
+          >
+            Aceptar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -209,6 +242,10 @@ export default {
    data: (vm) => ({
      useHoursOnly: true,
      dialogDelete: false,
+     dialogInfoSocket:false,
+      carga:false,
+     infoSocket:'',
+     connection: null,
      dialogAlumnInsuf:false,
       date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       dateFormatted: vm.formatDate((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)),
@@ -244,7 +281,7 @@ export default {
         const path = `${this.$hostname}/backtablas/lista`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log("lista",response.data)
+             //console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -275,7 +312,7 @@ export default {
         const path = `${this.$hostname}/backtablas/lista`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log("lista",response.data)
+             //console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -415,6 +452,9 @@ export default {
         closeAlumn () {
         this.dialogAlumnInsuf = false
       },
+      closeInfoSocket(){
+        this.dialogInfoSocket=false
+      },
         validate (evt) {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
@@ -427,7 +467,14 @@ export default {
         this.$root.$emit("inicio") //devuelva a la pagina de inicio
       },
       guardarChat(){//chat
+        
+        let timeG = this.time
+        let dateG = this.date
          const path = `${this.$hostname}/backtablas/guardac`
+          var hoy = new Date()
+          var horaActual = hoy.getHours()<10?"0"+hoy.getHours():hoy.getHours()   
+          var FechaActual  = hoy.getFullYear()+"-"+((hoy.getMonth()+1)<10?"0"+(hoy.getMonth()+1):(hoy.getMonth()+1))+"-"+(hoy.getDate()<10?"0"+hoy.getDate():hoy.getDate())
+          const [horaChat,] =this.time.split(':')
           let chat = new FormData()
           chat.append("idcurso",this.$session.get("idcurso"))
           chat.append("nombre",this.datosForm.nombre)
@@ -436,19 +483,84 @@ export default {
           chat.append("editor",this.datosForm.editor)
           chat.append("moderador",this.datosForm.moderador)
           chat.append("observadores",this.datosForm.observadores)
-          console.log(this.date, this.time,this.datosForm)
-           axios.post(path,chat).then((response) => {
-                console.log("ok",response.data)
-                this.$refs.form.reset()
-                this.$emit("agregarTabla",3)
-                this.$root.$emit("actualizaSelect")
-                this.$root.$emit("actualizaLAlum")
-          })
-          .catch((error)=>{
-            console.log(error)
-            this.$emit("agregarTabla",-1)
-          })
+          console.log("FORMATOS",this.date,FechaActual,horaChat,horaActual)
+          if(horaChat>=horaActual || Date.parse(this.date)>Date.parse(FechaActual)){
+            this.carga = true
+            axios.post(path,chat).then((response) => {
+                  console.log("ok",response.data)
+                  //this.$refs.form.reset()
+                  this.$emit("agregarTabla",3)
+                  this.$root.$emit("actualizaSelect")
+                  //this.$root.$emit("actualizaLAlum")
+                  this.connection.send("helli#"+timeG+"#"+dateG)
+                  this.connection.close();
+                  this.carga=false
+            })
+            .catch((error)=>{
+              console.log(error)
+              this.$emit("agregarTabla",-1)
+            })
+        }else{
+            this.infoSocket = "El chat no puede ser creado en un horario pasado."
+            this.dialogInfoSocket = true
+        }
+      }
+    },
+    created(){
+      console.log("starting")
+      var that = this
+      this.connection = new WebSocket("ws://colabwebsocket.herokuapp.com")
 
+      this.connection.onopen = function(event){
+        console.log(event)
+        console.log("conectado")
+      }
+
+      this.connection.onmessage = function(event){
+        console.log("EVENT", event)
+        console.log('HAY MENSAJE = ' + event.data)
+        if(event.data.includes("helli")){
+          console.log("SE RECIBIO HELLI")
+          const [pal, tiemp, fech] = event.data.split('#')
+          console.log(pal)
+          if(tiemp==that.time && fech==that.date){
+            console.log("ENTRAMOS")
+            that.items=[]
+            that.items2=[]
+            that.dateFormatted = that.formatDate(that.date)
+            let curso = new FormData()
+            curso.append("id",that.$session.get("idcurso"))
+            curso.append("fecha", that.date)
+            let h = that.formatTime(that.time)
+            //console.log("THAT ",that.dateFormatted,that.date,that.time)
+            curso.append("hora",h)
+            const path = `${that.$hostname}/backtablas/lista`
+            axios.post(path,curso).then((response) => {
+                that.datosResponse = response.data
+                //console.log("lista",response.data)
+                if(that.datosResponse.length<4){
+                  that.infoSocket="Alguien ha creado un chat a esta misma hora y fecha, el chat no se registrará, porque no hay alumnos suficientes para la hora y fecha seleccionada."
+                }else{
+                  that.infoSocket="Alguien ha creado un chat a esta misma hora y fecha, la lista de alumnos ha cambiado."
+                }
+                that.dialogInfoSocket=true
+                for (let i = 0; i < that.datosResponse.length; i++) {
+                that.items.push({"id":that.datosResponse[i].id,
+                                "nombre":that.datosResponse[i].nombre,
+                                "disabled": false})
+                that.items2.push({"id":that.datosResponse[i].id,
+                                "nombre":that.datosResponse[i].nombre,
+                                "disabled": false})                
+            
+                }
+              })
+              .catch((error)=>{
+                console.log(error)
+              })
+          }  
+          
+        }
+        
       }
     },
     mounted(){
@@ -458,10 +570,11 @@ export default {
         curso.append("fecha", this.date)
         let h = this.formatTime(this.time)
         curso.append("hora",h)
+        //console.log("THIS ",this.dateFormatted,this.date,this.time)
         const path = `${this.$hostname}/backtablas/lista`
         axios.post(path,curso).then((response) => {
              this.datosResponse = response.data
-             console.log("lista",response.data)
+             //console.log("lista",response.data)
             for (let i = 0; i < this.datosResponse.length; i++) {
             this.items.push({"id":this.datosResponse[i].id,
                             "nombre":this.datosResponse[i].nombre,
@@ -471,15 +584,12 @@ export default {
                             "disabled": false})                
          
             }
+            console.log(this.items,this.items2)
           })
           .catch((error)=>{
             console.log(error)
           })
-          this.$root.$on("actualizaLAlum",()=>{
-            this.datosForm.editor=0
-            this.datosForm.moderador=0
-            this.datosForm.observadores=0
-      })
+          
     },
     computed:{
       computedDateFormatted () {

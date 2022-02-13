@@ -131,6 +131,7 @@
             this.cardListaChHis=false
         },
         actTabla(v){
+          console.log("ENTRA",v)
           if(v==-1){
             this.text = 'Ha ocurrido un error, intente de nuevo'
             this.color = "red"
@@ -199,6 +200,8 @@
         let token = this.$session.get('jwt')
         let datosUsuario = jwt_decode(token)
         this.userInfo = datosUsuario.Tipo+': '+datosUsuario.Nombre
+
+
     }
   }
 </script>

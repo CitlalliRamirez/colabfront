@@ -42,7 +42,17 @@
         </v-col>
       </v-row>
     </v-card-title>
+     <div class="text-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      v-if="carga"
+      :size="70"
+      :width="7"
+    ></v-progress-circular>
+    </div>
     <v-data-table
+      v-if="!carga"
       :headers="headers"
       :items="datosTabla"
       :search="search"
@@ -205,7 +215,8 @@ import jwt_decode from 'jwt-decode'
 export default {
    name: 'ListaCurso',
    data: () => ({
-       dialog: false,
+        dialog: false,
+        carga: true,
         ocultarCarrerita:false,
         ocultarEd: false,
         ocultarEl:false,
@@ -263,6 +274,7 @@ export default {
         this.dialogDelete= true
       },
       confirmDelete(){ //eliminar de cursos
+        this.carga = true
         const path = `${this.$hostname}/backtablas/cursos/${this.itemId}/`
         axios.delete(path).then((response) => {
           console.log("ok",response.data)
@@ -278,6 +290,7 @@ export default {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
         if(vari==true){
+            this.carga = true
             this.actualizar()
         }
       },
@@ -318,7 +331,7 @@ export default {
        console.log(this.datosResponse)
        if(this.seleccionaCarrera=="Todos"){
          for (let i = 0; i < this.datosResponse.length; i++) {
-         console.log(this.datosResponse[i].carrera)
+         //console.log(this.datosResponse[i].carrera)
          this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
                                "semestre":this.datosResponse[i].semestre,
@@ -329,7 +342,7 @@ export default {
        }//
        }else{
        for (let i = 0; i < this.datosResponse.length; i++) {
-         console.log(this.datosResponse[i].carrera)
+         //console.log(this.datosResponse[i].carrera)
          if(this.seleccionaCarrera==this.datosResponse[i].carrera){
          this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
@@ -359,7 +372,7 @@ export default {
      datos.append("idU",idU)
      axios.post(path,datos).then((response) => {
        this.datosResponse = response.data
-       console.log(this.datosResponse)
+       //console.log(this.datosResponse)
        for (let i = 0; i < this.datosResponse.length; i++) {
          this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
@@ -368,6 +381,7 @@ export default {
                                "profesor":this.datosResponse[i].idprofesor})
          
        }
+       this.carga=false
        
      })
      .catch((error) => {
