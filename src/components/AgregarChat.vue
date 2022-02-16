@@ -532,7 +532,9 @@ export default {
           if(idmsg == that.idUsr ){
             that.guardarChat()
           }
-
+          else{
+            setTimeout( () => {return}, 5000 )
+          }
           return
         }
         if(event.data.includes("helli")){
