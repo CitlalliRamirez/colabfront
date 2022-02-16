@@ -236,7 +236,7 @@
 
 <script>
 import axios from 'axios'
-
+import jwt_decode from 'jwt-decode'
 export default {
    name: 'AgregarChat',
    data: (vm) => ({
@@ -245,6 +245,7 @@ export default {
      dialogInfoSocket:false,
       carga:false,
      infoSocket:'',
+     idUsr:0,
      connection: null,
      dialogAlumnInsuf:false,
       date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
@@ -459,7 +460,9 @@ export default {
         evt.preventDefault()
         let vari = this.$refs.form.validate()
         if(vari==true){
-           this.guardarChat()
+
+          this.connection.send("q-"+this.idUsr)
+           //this.guardarChat()
         }
       },
       cancelar(){
@@ -483,7 +486,7 @@ export default {
           chat.append("editor",this.datosForm.editor)
           chat.append("moderador",this.datosForm.moderador)
           chat.append("observadores",this.datosForm.observadores)
-          console.log("FORMATOS",this.date,FechaActual,horaChat,horaActual)
+          //console.log("FORMATOS",this.date,FechaActual,horaChat,horaActual)
           if(horaChat>=horaActual || Date.parse(this.date)>Date.parse(FechaActual)){
             this.carga = true
             axios.post(path,chat).then((response) => {
@@ -507,18 +510,31 @@ export default {
       }
     },
     created(){
-      console.log("starting")
+      let token = this.$session.get('jwt')
+      let datosUsuario = jwt_decode(token)
+      this.idUsr = datosUsuario.Id
+      console.log("startingggg")
       var that = this
       this.connection = new WebSocket("wss://colabwebsocket.herokuapp.com")
 
       this.connection.onopen = function(event){
-        console.log(event)
-        console.log("conectado")
+        //console.log(event)
+        console.log("conectado en: ", event.target.url)
       }
 
       this.connection.onmessage = function(event){
-        console.log("EVENT", event)
-        console.log('HAY MENSAJE = ' + event.data)
+        //console.log("EVENT", event)
+        //console.log('HAY MENSAJE = ' + event.data)
+        if(event.data.includes("q")){
+          const [,idmsg] = event.data.split("-")
+          console.log("IDMSG",idmsg)
+          console.log(that.idUsr)
+          if(idmsg == that.idUsr ){
+            that.guardarChat()
+          }
+
+          return
+        }
         if(event.data.includes("helli")){
           console.log("SE RECIBIO HELLI")
           const [pal, tiemp, fech] = event.data.split('#')
@@ -558,7 +574,7 @@ export default {
                 console.log(error)
               })
           }  
-          
+          return
         }
         
       }
@@ -584,7 +600,7 @@ export default {
                             "disabled": false})                
          
             }
-            console.log(this.items,this.items2)
+            //console.log(this.items,this.items2)
           })
           .catch((error)=>{
             console.log(error)

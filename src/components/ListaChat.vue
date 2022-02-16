@@ -405,7 +405,7 @@ export default {
                             "disabled": false})                
          
             }
-            console.log("WATCH",this.items,this.items2)
+            
           })
           .catch((error)=>{
             console.log(error)
@@ -441,7 +441,7 @@ export default {
                             "disabled": false})                
          
             }
-            console.log("WATCH",this.items,this.items2)
+            
           })
           .catch((error)=>{
             console.log(error)
@@ -613,7 +613,7 @@ export default {
         this.activaChat = true
         this.items.splice(0,this.items.length)
         this.items2.splice(0,this.items2.length)
-        console.log("ITEM:",this.items,this.items2)
+      
         this.editedIndex = this.datosTabla.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.editedItemResp = Object.assign({}, item)
@@ -647,7 +647,7 @@ export default {
                                 "disabled": vt})
             }
             this.activaChat=false
-            console.log("LA busqueda se realizó",this.items,this.items2)
+          
             this.carga=false
         })
         .catch((error) => {
