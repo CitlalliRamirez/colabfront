@@ -533,7 +533,7 @@ export default {
             that.guardarChat()
           }
           else{
-            setTimeout( () => {return}, 30000 )
+            setTimeout( () => {return}, 45000 )
           }
           return
         }
