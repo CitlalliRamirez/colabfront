@@ -62,6 +62,20 @@
     >
     <template v-slot:item.actions="{ item }">
       <v-btn
+        depressed
+        small
+        @click="verItem(item)"
+      >
+      Ver grupo
+      <v-icon
+        small
+        class="mr-2"
+      >
+        mdi-pencil
+      </v-icon>
+      </v-btn>
+
+      <v-btn
         v-if="ocultarEd"
         depressed
         small
@@ -204,6 +218,30 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+
+    <v-dialog
+      v-model="dialogGrupo"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          Alumnos
+        </v-card-title>
+        <v-card-text>{{alumns}}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue"
+            text
+            @click="closeInfoA"
+          >
+            Aceptar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
   </v-container>
 </template>
@@ -217,6 +255,8 @@ export default {
    data: () => ({
         dialog: false,
         carga: true,
+        dialogGrupo:false,
+        alumns:' ',
         ocultarCarrerita:false,
         ocultarEd: false,
         ocultarEl:false,
@@ -226,6 +266,7 @@ export default {
         items3:[],
         itemsC: ['Todos','Ing. Computación', 'Ing. Civil', 'Ing. Industrial', 'Lic. Matemáticas Aplicadas','Ing. Diseño','Ing. Alimentos','Ing. Electrónica','Lic. Ciencias Empresariales','Ing. Mecatrónica','Ing. Física Aplicada','Ing. Mécanica Automitriz'],
         datosCurso: {curso_nombre:'',profesor:0},
+        datosGrupo: {semestre:'',carrera:''},
         nameRules: [
           v => !!v || 'Campo obligatorio',
         ],
@@ -261,6 +302,27 @@ export default {
         this.editedIndex = this.datosTabla.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
+
+      },
+      closeInfoA(){
+        this.dialogGrupo=false
+      },
+      verItem (item){
+        console.log("s",item)
+        this.alumns =''
+        let datos = new FormData()
+        datos.append("semestre",item.semestre)
+        datos.append("carrera",item.carrera)
+     const path = `${this.$hostname}/backtablas/listadocurso/listadogrupo`
+     axios.post(path,datos).then((response) => {
+       this.datosResponse =response.data
+       for (let i = 0; i < this.datosResponse.length; i++) {
+         console.log(this.datosResponse[i].nombre)
+         this.alumns = this.alumns + " "+this.datosResponse[i].nombre
+       }
+       
+        this.dialogGrupo=true
+     })
 
       },
       closeDelete () {

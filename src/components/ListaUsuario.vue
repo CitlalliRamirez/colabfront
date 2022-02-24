@@ -60,6 +60,7 @@
       <v-btn
       depressed
       small
+      :disabled="item.hab"
       @click="deleteItem(item)"
       >
       Eliminar
@@ -207,6 +208,7 @@ export default {
    data: () => ({
         dialog: false,
         carga: true,
+        bloqueaAdmin:true,
         editedIndex: -1,
         datosUsuario: {usuario_correo:'',usuario_contrasena:''},
         datosAdmin: {
@@ -375,16 +377,29 @@ export default {
 
     },
     mounted () {
+
      const path = `${this.$hostname}/backtablas/listado`
      axios.get(path).then((response) => {
        this.datosResponse = response.data
        for (let i = 0; i < this.datosResponse.length; i++) {
-         this.datosTabla.push({"id":this.datosResponse[i].id,
+          if(this.datosResponse[i].tipo=="Administrador"){
+this.datosTabla.push({"id":this.datosResponse[i].id,
                                "nombre":this.datosResponse[i].nombre,
                                "correo":this.datosResponse[i].correo,
                                "contrasena":this.datosResponse[i].contrasena,
                                "tipo":this.datosResponse[i].tipo,
-                               "idtipo":this.datosResponse[i].idtipo})
+                               "idtipo":this.datosResponse[i].idtipo,
+                               "hab":true})
+          }else{
+this.datosTabla.push({"id":this.datosResponse[i].id,
+                               "nombre":this.datosResponse[i].nombre,
+                               "correo":this.datosResponse[i].correo,
+                               "contrasena":this.datosResponse[i].contrasena,
+                               "tipo":this.datosResponse[i].tipo,
+                               "idtipo":this.datosResponse[i].idtipo,
+                               "hab":false})
+          }
+         
          
        }
         this.carga= false
@@ -393,6 +408,8 @@ export default {
      .catch((error) => {
        console.log(error)
      }) 
+
+     
     },
     
 }

@@ -1,5 +1,13 @@
 <template>
   <v-container>
+    <div class="text-right">
+          <v-btn 
+          dark
+          @click="logout"
+          color="blue-grey lighten-2">
+            Cerrar sesión
+          </v-btn>
+        </div>
     <div class="alto"></div>
     <v-card
       class="mx-auto"
@@ -23,7 +31,7 @@
       <v-col
         class="d-flex"
         cols="12"
-        sm="2"
+        sm="3"
         v-if="v2"
       >
         <v-select
@@ -39,7 +47,7 @@
       <v-col
         class="d-flex"
         cols="12"
-        :sm="sm"
+        :sm="3"
       >
         <v-select
           @change="ocultarSelect2()"
@@ -50,20 +58,21 @@
           dense
         ></v-select>
       </v-col>
-      <v-col
-        class="d-flex"
+      <v-col 
         cols="12"
-        sm="5"
+        sm="3"
       >
-        <v-select
-          :items="items3"
-          :label="userInfo"
-          @change="logout"
-          dense
-        ></v-select>
+      <div class="text-right">
+        <p 
+          style="color:grey;"
+          :label="userInfo" 
+        >{{userInfo}}</p>
+        </div>
       </v-col>
     </v-row>
+    
     </v-card>
+    
   </v-container>
 </template>
 
